@@ -1,0 +1,61 @@
+/*
+ * gocl-buffer.h
+ *
+ * Gocl - GLib/GObject wrapper for OpenCL
+ * Copyright (C) 2012 Igalia S.L.
+ *
+ * Authors:
+ *  Eduardo Lima Mitev <elima@igalia.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License at http://www.gnu.org/licenses/lgpl-3.0.txt
+ * for more details.
+ */
+
+#ifndef __GOCL_BUFFER_H__
+#define __GOCL_BUFFER_H__
+
+#include <glib-object.h>
+#include <CL/opencl.h>
+
+#include <gocl-decls.h>
+
+G_BEGIN_DECLS
+
+#define GOCL_TYPE_BUFFER              (gocl_buffer_get_type ())
+#define GOCL_BUFFER(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), GOCL_TYPE_BUFFER, GoclBuffer))
+#define GOCL_BUFFER_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), GOCL_TYPE_BUFFER, GoclBufferClass))
+#define GOCL_IS_BUFFER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GOCL_TYPE_BUFFER))
+#define GOCL_IS_BUFFER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), GOCL_TYPE_BUFFER))
+#define GOCL_BUFFER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), GOCL_TYPE_BUFFER, GoclBufferClass))
+
+typedef struct _GoclBufferClass GoclBufferClass;
+typedef struct _GoclBuffer GoclBuffer;
+typedef struct _GoclBufferPrivate GoclBufferPrivate;
+
+struct _GoclBuffer
+{
+  GObject parent_instance;
+
+  GoclBufferPrivate *priv;
+};
+
+struct _GoclBufferClass
+{
+  GObjectClass parent_class;
+};
+
+GType                  gocl_buffer_get_type                   (void) G_GNUC_CONST;
+
+cl_mem                 gocl_buffer_get_buffer                 (GoclBuffer *self);
+
+G_END_DECLS
+
+#endif /* __GOCL_BUFFER_H__ */
