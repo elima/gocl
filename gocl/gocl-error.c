@@ -75,6 +75,17 @@ get_error_code_description (cl_int err_code)
   }
 }
 
+/**
+ * gocl_error_check_opencl:
+ * @err_code: (type guint64): An OpenCL error code.
+ * @error: (out) (allow-none): A pointer to a #GError.
+ *
+ * Checks if @err_code describes an OpenCL error and fills @error pointer
+ * (if not %NULL), with a new #GError with the corresponding domain, code
+ * and description.
+ *
+ * Returns: %TRUE if there is an error, %FALSE otherwise.
+ **/
 gboolean
 gocl_error_check_opencl (cl_int err_code, GError **error)
 {
