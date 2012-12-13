@@ -34,6 +34,8 @@ struct _GoclQueuePrivate
 
   GoclContext *context;
   GoclDevice *device;
+
+  guint flags;
 };
 
 /* properties */
@@ -41,7 +43,8 @@ enum
 {
   PROP_0,
   PROP_CONTEXT,
-  PROP_DEVICE
+  PROP_DEVICE,
+  PROP_FLAGS
 };
 
 static void           gocl_queue_class_init            (GoclQueueClass *class);
@@ -97,6 +100,16 @@ gocl_queue_class_init (GoclQueueClass *class)
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS));
 
+  g_object_class_install_property (obj_class, PROP_FLAGS,
+                                   g_param_spec_uint ("flags",
+                                                      "Flags",
+                                                      "The command queue properties",
+                                                      0,
+                                                      GOCL_QUEUE_FLAGS_PROFILING,
+                                                      0,
+                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
+                                                      G_PARAM_STATIC_STRINGS));
+
   g_type_class_add_private (class, sizeof (GoclQueuePrivate));
 }
 
@@ -121,7 +134,7 @@ gocl_queue_initable_init (GInitable     *initable,
 
   self->priv->queue = clCreateCommandQueue (ctx,
                                             device_id,
-                                            0,
+                                            self->priv->flags,
                                             &err_code);
 
   if (gocl_error_check_opencl (err_code, error))
@@ -191,6 +204,10 @@ set_property (GObject      *obj,
       self->priv->device = g_value_dup_object (value);
       break;
 
+    case PROP_FLAGS:
+      self->priv->flags = g_value_get_uint (value);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
@@ -217,6 +234,10 @@ get_property (GObject    *obj,
       g_value_set_object (value, self->priv->device);
       break;
 
+    case PROP_FLAGS:
+      g_value_set_uint (value, self->priv->flags);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
@@ -236,4 +257,18 @@ gocl_queue_get_queue (GoclQueue *self)
   g_return_val_if_fail (GOCL_IS_QUEUE (self), NULL);
 
   return self->priv->queue;
+}
+
+/**
+ * gocl_queue_get_flags:
+ * @self: The #GoclQueue
+ *
+ * Returns: The flags (properties) of the command queue.
+ **/
+guint
+gocl_queue_get_flags (GoclQueue *self)
+{
+  g_return_val_if_fail (GOCL_IS_QUEUE (self), 0);
+
+  return self->priv->flags;
 }
