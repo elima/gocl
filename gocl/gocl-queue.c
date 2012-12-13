@@ -248,8 +248,9 @@ get_property (GObject    *obj,
 
 /**
  * gocl_queue_get_queue:
+ * @self: The #GoclQueue
  *
- * Returns: (transfer none):
+ * Returns: (transfer none) (type guint64): The internal 'cl_command_queue'.
  **/
 cl_command_queue
 gocl_queue_get_queue (GoclQueue *self)
