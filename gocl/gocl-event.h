@@ -72,6 +72,9 @@ void                   gocl_event_then                       (GoclEvent         
                                                               GoclEventCallback  callback,
                                                               gpointer           user_data);
 
+cl_event *             gocl_event_list_to_array              (GList *event_list,
+                                                              gsize *len);
+
 G_END_DECLS
 
 #endif /* __GOCL_EVENT_H__ */

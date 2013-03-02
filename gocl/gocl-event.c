@@ -438,3 +438,43 @@ gocl_event_then (GoclEvent         *self,
                                          self);
     }
 }
+
+/**
+ * gocl_event_list_to_array:
+ * @event_list: (element-type Gocl.Event) (allow-none):
+ * @len: (out) (allow-none):
+ *
+ * Returns: (transfer full) (array length=len):
+ **/
+cl_event *
+gocl_event_list_to_array (GList *event_list, gsize *len)
+{
+  cl_event *event_arr = NULL;
+  gint i;
+  gsize _len;
+  GList *node;
+
+  _len = g_list_length (event_list);
+
+  if (len != NULL)
+    *len = _len;
+
+  if (_len == 0)
+    return event_arr;
+
+  event_arr = g_new (cl_event, g_list_length (event_list));
+
+  node = event_list;
+  i = 0;
+  while (node != NULL)
+    {
+      g_return_val_if_fail (GOCL_IS_EVENT (node->data), NULL);
+
+      event_arr[i] = gocl_event_get_event (GOCL_EVENT (node->data));
+
+      i++;
+      node = g_list_next (node);
+    }
+
+  return event_arr;
+}
