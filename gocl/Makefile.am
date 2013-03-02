@@ -40,7 +40,8 @@ source_c = \
 	gocl-buffer.c \
 	gocl-program.c \
 	gocl-kernel.c \
-	gocl-queue.c
+	gocl-queue.c \
+	gocl-event.c
 
 source_h = \
 	gocl.h \
@@ -51,7 +52,8 @@ source_h = \
 	gocl-buffer.h \
 	gocl-program.h \
 	gocl-kernel.h \
-	gocl-queue.h
+	gocl-queue.h \
+	gocl-event.h
 
 source_h_priv =
 
