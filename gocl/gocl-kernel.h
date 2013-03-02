@@ -77,6 +77,11 @@ gboolean               gocl_kernel_run_in_device_sync         (GoclKernel  *self
                                                                gsize        local_work_size,
                                                                GList       *event_wait_list,
                                                                GError     **error);
+GoclEvent *            gocl_kernel_run_in_device              (GoclKernel  *self,
+                                                               GoclDevice  *device,
+                                                               gsize        global_work_size,
+                                                               gsize        local_work_size,
+                                                               GList       *event_wait_list);
 
 G_END_DECLS
 
