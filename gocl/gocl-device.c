@@ -2,7 +2,7 @@
  * gocl-device.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -20,7 +20,6 @@
  */
 
 #include <gio/gio.h>
-#include <CL/opencl.h>
 
 #include "gocl-device.h"
 
@@ -86,14 +85,11 @@ gocl_device_class_init (GoclDeviceClass *class)
                                                         G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (obj_class, PROP_ID,
-                                   g_param_spec_uint64 ("id",
-                                                        "Device id",
-                                                        "The id of this device",
-                                                        0,
-                                                        G_MAXUINT64,
-                                                        0,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
-                                                        G_PARAM_STATIC_STRINGS));
+                                   g_param_spec_pointer ("id",
+                                                         "Device id",
+                                                         "The id of this device",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
+                                                         G_PARAM_STATIC_STRINGS));
 
   g_type_class_add_private (class, sizeof (GoclDevicePrivate));
 }
@@ -154,7 +150,7 @@ set_property (GObject      *obj,
       break;
 
     case PROP_ID:
-      self->priv->device_id = (cl_device_id) g_value_get_uint64 (value);
+      self->priv->device_id = (cl_device_id) g_value_get_pointer (value);
       break;
 
     default:
@@ -180,7 +176,7 @@ get_property (GObject    *obj,
       break;
 
     case PROP_ID:
-      g_value_set_uint64 (value, (guint64) self->priv->device_id);
+      g_value_set_pointer (value, (gpointer) self->priv->device_id);
       break;
 
     default:
@@ -191,12 +187,17 @@ get_property (GObject    *obj,
 
 /* public */
 
-guint64
+/**
+ * gocl_device_get_id:
+ *
+ * Returns: (transfer none) (type guint64):
+ **/
+cl_device_id
 gocl_device_get_id (GoclDevice *self)
 {
-  g_return_val_if_fail (GOCL_IS_DEVICE (self), 0);
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), NULL);
 
-  return (guint64) self->priv->device_id;
+  return self->priv->device_id;
 }
 
 gsize

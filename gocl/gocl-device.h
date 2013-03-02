@@ -2,7 +2,7 @@
  * gocl-device.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -23,6 +23,7 @@
 #define __GOCL_DEVICE_H__
 
 #include <glib-object.h>
+#include <CL/opencl.h>
 
 #include <gocl-buffer.h>
 #include <gocl-queue.h>
@@ -54,7 +55,7 @@ struct _GoclDeviceClass
 
 GType                  gocl_device_get_type                   (void) G_GNUC_CONST;
 
-guint64                gocl_device_get_id                     (GoclDevice *self);
+cl_device_id           gocl_device_get_id                     (GoclDevice *self);
 
 gsize                  gocl_device_get_max_work_group_size    (GoclDevice  *self,
                                                                GError     **error);
