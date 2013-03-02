@@ -27,6 +27,7 @@
 #include "gocl-error.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
+#include "gocl-event.h"
 
 struct _GoclBufferPrivate
 {
@@ -249,13 +250,14 @@ gocl_buffer_read_sync (GoclBuffer  *self,
 {
   cl_command_queue _queue;
   cl_int err_code;
+  cl_event *_event_wait_list = NULL;
 
   g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
   g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
 
-  _queue = gocl_queue_get_queue (queue);
+  _event_wait_list = gocl_event_list_to_array (event_wait_list, NULL);
 
-  /* @TODO: get the cl_event array from @event_wait_list */
+  _queue = gocl_queue_get_queue (queue);
 
   err_code = clEnqueueReadBuffer (_queue,
                                   self->priv->buf,
@@ -263,8 +265,11 @@ gocl_buffer_read_sync (GoclBuffer  *self,
                                   offset,
                                   size,
                                   target_ptr,
-                                  0, NULL,
+                                  g_list_length (event_wait_list),
+                                  _event_wait_list,
                                   NULL);
+
+  g_free (_event_wait_list);
 
   return ! gocl_error_check_opencl (err_code, error);
 }
@@ -285,13 +290,14 @@ gocl_buffer_write_sync (GoclBuffer      *self,
 {
   cl_command_queue _queue;
   cl_int err_code;
+  cl_event *_event_wait_list = NULL;
 
   g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
   g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
 
-  _queue = gocl_queue_get_queue (queue);
+  _event_wait_list = gocl_event_list_to_array (event_wait_list, NULL);
 
-  /* @TODO: get the cl_event array from @event_wait_list */
+  _queue = gocl_queue_get_queue (queue);
 
   err_code = clEnqueueWriteBuffer (_queue,
                                    self->priv->buf,
@@ -299,8 +305,11 @@ gocl_buffer_write_sync (GoclBuffer      *self,
                                    offset,
                                    size,
                                    data,
-                                   0, NULL,
+                                   g_list_length (event_wait_list),
+                                   _event_wait_list,
                                    NULL);
+
+  g_free (_event_wait_list);
 
   return ! gocl_error_check_opencl (err_code, error);
 }
