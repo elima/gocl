@@ -263,12 +263,18 @@ gocl_device_read_buffer_sync (GoclDevice  *self,
 }
 
 /**
- * gocl_device_get_queue:
+ * gocl_device_get_default_queue:
+ * @self: The #GoclDevice
+ * @error: (out) (allow-none) (transfer full): A pointer to a #GError, or %NULL
  *
- * Returns: (transfer none):
+ * Returns a #GoclQueue command queue associated with this device, or error if
+ *   a command queue cannot be created.
+ *
+ * Returns: (transfer none): A #GoclQueue object, which is owned  by the device
+ *   and should not be freed.
  **/
 GoclQueue *
-gocl_device_get_queue (GoclDevice *self, GError **error)
+gocl_device_get_default_queue (GoclDevice *self, GError **error)
 {
   if (self->priv->queue == NULL)
     {

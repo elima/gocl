@@ -2,7 +2,7 @@
  * gocl-kernel.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -270,7 +270,7 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
   g_return_val_if_fail (GOCL_IS_KERNEL (self), FALSE);
   g_return_val_if_fail (GOCL_IS_DEVICE (device), FALSE);
 
-  queue = gocl_device_get_queue (device, error);
+  queue = gocl_device_get_default_queue (device, error);
   if (queue == NULL)
     return FALSE;
 

@@ -67,7 +67,7 @@ gboolean               gocl_device_read_buffer_sync           (GoclDevice  *self
                                                                gpointer     target_ptr,
                                                                GError     **error);
 
-GoclQueue *            gocl_device_get_queue                  (GoclDevice  *self,
+GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self,
                                                                GError     **error);
 
 G_END_DECLS
