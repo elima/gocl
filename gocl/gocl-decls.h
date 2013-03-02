@@ -2,7 +2,7 @@
  * gocl-decls.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -27,6 +27,14 @@
 
 G_BEGIN_DECLS
 
+/**
+ * GoclDeviceType:
+ * @GOCL_DEVICE_TYPE_DEFAULT:     Default device
+ * @GOCL_DEVICE_TYPE_CPU:         CPU device
+ * @GOCL_DEVICE_TYPE_GPU:         GPU device
+ * @GOCL_DEVICE_TYPE_ACCELERATOR: Accelerator device
+ * @GOCL_DEVICE_TYPE_ALL:         Any device
+ **/
 typedef enum
 {
   GOCL_DEVICE_TYPE_DEFAULT     = CL_DEVICE_TYPE_DEFAULT,
