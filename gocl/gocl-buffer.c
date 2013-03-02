@@ -2,7 +2,7 @@
  * gocl-buffer.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -231,4 +231,76 @@ gocl_buffer_get_buffer (GoclBuffer *self)
   g_return_val_if_fail (GOCL_IS_BUFFER (self), NULL);
 
   return self->priv->buf;
+}
+
+/**
+ * gocl_buffer_read_sync:
+ * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ *
+ **/
+gboolean
+gocl_buffer_read_sync (GoclBuffer  *self,
+                       GoclQueue   *queue,
+                       gpointer     target_ptr,
+                       gsize        size,
+                       goffset      offset,
+                       GList       *event_wait_list,
+                       GError     **error)
+{
+  cl_command_queue _queue;
+  cl_int err_code;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  /* @TODO: get the cl_event array from @event_wait_list */
+
+  err_code = clEnqueueReadBuffer (_queue,
+                                  self->priv->buf,
+                                  CL_TRUE,
+                                  offset,
+                                  size,
+                                  target_ptr,
+                                  0, NULL,
+                                  NULL);
+
+  return ! gocl_error_check_opencl (err_code, error);
+}
+
+/**
+ * gocl_buffer_write_sync:
+ * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ *
+ **/
+gboolean
+gocl_buffer_write_sync (GoclBuffer      *self,
+                        GoclQueue       *queue,
+                        const gpointer   data,
+                        gsize            size,
+                        goffset          offset,
+                        GList           *event_wait_list,
+                        GError         **error)
+{
+  cl_command_queue _queue;
+  cl_int err_code;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  /* @TODO: get the cl_event array from @event_wait_list */
+
+  err_code = clEnqueueWriteBuffer (_queue,
+                                   self->priv->buf,
+                                   CL_TRUE,
+                                   offset,
+                                   size,
+                                   data,
+                                   0, NULL,
+                                   NULL);
+
+  return ! gocl_error_check_opencl (err_code, error);
 }

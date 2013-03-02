@@ -2,7 +2,7 @@
  * gocl-buffer.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -26,6 +26,7 @@
 #include <CL/opencl.h>
 
 #include <gocl-decls.h>
+#include <gocl-queue.h>
 
 G_BEGIN_DECLS
 
@@ -55,6 +56,21 @@ struct _GoclBufferClass
 GType                  gocl_buffer_get_type                   (void) G_GNUC_CONST;
 
 cl_mem                 gocl_buffer_get_buffer                 (GoclBuffer *self);
+
+gboolean               gocl_buffer_read_sync                  (GoclBuffer  *self,
+                                                               GoclQueue   *queue,
+                                                               gpointer     target_ptr,
+                                                               gsize        size,
+                                                               goffset      offset,
+                                                               GList       *event_wait_list,
+                                                               GError     **error);
+gboolean               gocl_buffer_write_sync                 (GoclBuffer      *self,
+                                                               GoclQueue       *queue,
+                                                               const gpointer   data,
+                                                               gsize            size,
+                                                               goffset          offset,
+                                                               GList           *event_wait_list,
+                                                               GError         **error);
 
 G_END_DECLS
 
