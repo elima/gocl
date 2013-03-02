@@ -221,47 +221,6 @@ gocl_device_get_max_work_group_size (GoclDevice *self, GError **error)
   return self->priv->max_work_group_size;
 }
 
-gboolean
-gocl_device_read_buffer_sync (GoclDevice  *self,
-                              GoclBuffer  *buffer,
-                              goffset      offset,
-                              gsize        size,
-                              gpointer     target_ptr,
-                              GError     **error)
-{
-  GoclQueue *queue;
-  cl_command_queue _queue;
-  cl_mem buf;
-  cl_int err_code;
-
-  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
-  g_return_val_if_fail (GOCL_IS_BUFFER (buffer), FALSE);
-  g_return_val_if_fail (target_ptr != NULL, FALSE);
-
-  queue = gocl_device_get_queue (self, error);
-  if (queue == NULL)
-    return FALSE;
-
-  buf = gocl_buffer_get_buffer (buffer);
-  g_assert (buf != NULL);
-
-  _queue = gocl_queue_get_queue (queue);
-  g_assert (queue != NULL);
-
-  err_code = clEnqueueReadBuffer (_queue,
-                                  buf,
-                                  CL_TRUE,
-                                  offset,
-                                  size,
-                                  target_ptr,
-                                  0, NULL,
-                                  NULL);
-  if (gocl_error_check_opencl (err_code, error))
-    return FALSE;
-  else
-    return TRUE;
-}
-
 /**
  * gocl_device_get_default_queue:
  * @self: The #GoclDevice

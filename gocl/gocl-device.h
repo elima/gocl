@@ -60,13 +60,6 @@ cl_device_id           gocl_device_get_id                     (GoclDevice *self)
 gsize                  gocl_device_get_max_work_group_size    (GoclDevice  *self,
                                                                GError     **error);
 
-gboolean               gocl_device_read_buffer_sync           (GoclDevice  *self,
-                                                               GoclBuffer  *buffer,
-                                                               goffset      offset,
-                                                               gsize        size,
-                                                               gpointer     target_ptr,
-                                                               GError     **error);
-
 GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self,
                                                                GError     **error);
 
