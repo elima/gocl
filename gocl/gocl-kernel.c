@@ -255,17 +255,24 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
   return ! gocl_error_check_opencl (err_code, error);
 }
 
+/**
+ * gocl_kernel_run_in_device_sync:
+ * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ *
+ **/
 gboolean
 gocl_kernel_run_in_device_sync (GoclKernel  *self,
                                 GoclDevice  *device,
                                 gsize        global_work_size,
                                 gsize        local_work_size,
+                                GList       *event_wait_list,
                                 GError     **error)
 {
   cl_int err_code;
   cl_event event;
   GoclQueue *queue;
   cl_command_queue _queue;
+  cl_event *_event_wait_list = NULL;
 
   g_return_val_if_fail (GOCL_IS_KERNEL (self), FALSE);
   g_return_val_if_fail (GOCL_IS_DEVICE (device), FALSE);
@@ -273,6 +280,8 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
   queue = gocl_device_get_default_queue (device, error);
   if (queue == NULL)
     return FALSE;
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list, NULL);
 
   _queue = gocl_queue_get_queue (queue);
 
@@ -282,9 +291,12 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
                                      NULL,
                                      &global_work_size,
                                      &local_work_size,
-                                     0,
-                                     NULL,
+                                     g_list_length (event_wait_list),
+                                     _event_wait_list,
                                      &event);
+
+  g_free (_event_wait_list);
+
   if (gocl_error_check_opencl (err_code, error))
     return FALSE;
 

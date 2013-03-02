@@ -2,7 +2,7 @@
  * gocl-kernel.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -26,6 +26,7 @@
 
 #include <gocl-buffer.h>
 #include <gocl-device.h>
+#include <gocl-event.h>
 
 G_BEGIN_DECLS
 
@@ -74,6 +75,7 @@ gboolean               gocl_kernel_run_in_device_sync         (GoclKernel  *self
                                                                GoclDevice  *device,
                                                                gsize        global_work_size,
                                                                gsize        local_work_size,
+                                                               GList       *event_wait_list,
                                                                GError     **error);
 
 G_END_DECLS
