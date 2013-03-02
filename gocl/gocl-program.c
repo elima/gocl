@@ -2,7 +2,7 @@
  * gocl-program.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -56,10 +56,10 @@ static void           get_property                       (GObject    *obj,
 
 G_DEFINE_TYPE (GoclProgram, gocl_program, G_TYPE_OBJECT);
 
-#define GOCL_PROGRAM_GET_PRIVATE(obj) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), \
-                                GOCL_TYPE_PROGRAM, \
-                                GoclProgramPrivate)) \
+#define GOCL_PROGRAM_GET_PRIVATE(obj)                   \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj),                  \
+                                GOCL_TYPE_PROGRAM,      \
+                                GoclProgramPrivate))    \
 
 static void
 gocl_program_class_init (GoclProgramClass *class)

@@ -61,9 +61,9 @@ static void           get_property                      (GObject    *obj,
 
 G_DEFINE_TYPE (GoclDevice, gocl_device, G_TYPE_OBJECT);
 
-#define GOCL_DEVICE_GET_PRIVATE(obj)  \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), \
-                                GOCL_TYPE_DEVICE, \
+#define GOCL_DEVICE_GET_PRIVATE(obj)                \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj),              \
+                                GOCL_TYPE_DEVICE,   \
                                 GoclDevicePrivate)) \
 
 static void

@@ -68,10 +68,10 @@ G_DEFINE_TYPE_WITH_CODE (GoclBuffer, gocl_buffer, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gocl_buffer_initable_iface_init));
 
-#define GOCL_BUFFER_GET_PRIVATE(obj)  \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), \
-                                GOCL_TYPE_BUFFER, \
-                                GoclBufferPrivate)) \
+#define GOCL_BUFFER_GET_PRIVATE(obj)                    \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj),                  \
+                                GOCL_TYPE_BUFFER,       \
+                                GoclBufferPrivate))     \
 
 static void
 gocl_buffer_class_init (GoclBufferClass *class)

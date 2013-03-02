@@ -57,10 +57,10 @@ static void           get_property                       (GObject    *obj,
 
 G_DEFINE_TYPE (GoclKernel, gocl_kernel, G_TYPE_OBJECT);
 
-#define GOCL_KERNEL_GET_PRIVATE(obj) \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), \
-                                GOCL_TYPE_KERNEL, \
-                                GoclKernelPrivate)) \
+#define GOCL_KERNEL_GET_PRIVATE(obj)                    \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj),                  \
+                                GOCL_TYPE_KERNEL,       \
+                                GoclKernelPrivate))     \
 
 static void
 gocl_kernel_class_init (GoclKernelClass *class)

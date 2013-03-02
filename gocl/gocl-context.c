@@ -79,10 +79,10 @@ G_DEFINE_TYPE_WITH_CODE (GoclContext, gocl_context, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gocl_context_initable_iface_init));
 
-#define GOCL_CONTEXT_GET_PRIVATE(obj)  \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), \
-                                GOCL_TYPE_CONTEXT, \
-                                GoclContextPrivate)) \
+#define GOCL_CONTEXT_GET_PRIVATE(obj)                   \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj),                  \
+                                GOCL_TYPE_CONTEXT,      \
+                                GoclContextPrivate))    \
 
 static void
 gocl_context_class_init (GoclContextClass *class)

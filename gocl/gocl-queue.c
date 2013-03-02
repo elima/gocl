@@ -69,10 +69,10 @@ G_DEFINE_TYPE_WITH_CODE (GoclQueue, gocl_queue, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gocl_queue_initable_iface_init));
 
-#define GOCL_QUEUE_GET_PRIVATE(obj)  \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((obj), \
-                                GOCL_TYPE_QUEUE, \
-                                GoclQueuePrivate)) \
+#define GOCL_QUEUE_GET_PRIVATE(obj)                     \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((obj),                  \
+                                GOCL_TYPE_QUEUE,        \
+                                GoclQueuePrivate))      \
 
 static void
 gocl_queue_class_init (GoclQueueClass *class)
