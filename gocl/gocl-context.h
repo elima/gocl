@@ -2,7 +2,7 @@
  * gocl-context.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -73,6 +73,9 @@ GoclBuffer *           gocl_context_create_buffer              (GoclContext  *se
                                                                 gsize         size,
                                                                 gpointer      host_ptr,
                                                                 GError      **error);
+
+/* GoclDevice headers */
+GoclContext *          gocl_device_get_context                 (GoclDevice *device);
 
 G_END_DECLS
 

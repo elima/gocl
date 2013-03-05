@@ -200,6 +200,19 @@ gocl_device_get_id (GoclDevice *self)
   return self->priv->device_id;
 }
 
+/**
+ * gocl_device_get_context:
+ *
+ * Returns: (transfer none):
+ **/
+GoclContext *
+gocl_device_get_context (GoclDevice *self)
+{
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), NULL);
+
+  return self->priv->context;
+}
+
 gsize
 gocl_device_get_max_work_group_size (GoclDevice *self, GError **error)
 {
