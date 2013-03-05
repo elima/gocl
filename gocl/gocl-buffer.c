@@ -235,6 +235,19 @@ gocl_buffer_get_buffer (GoclBuffer *self)
 }
 
 /**
+ * gocl_buffer_get_context:
+ *
+ * Returns: (transfer none):
+ **/
+GoclContext *
+gocl_buffer_get_context (GoclBuffer *self)
+{
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), NULL);
+
+  return self->priv->context;
+}
+
+/**
  * gocl_buffer_read_sync:
  * @event_wait_list: (element-type Gocl.Event) (allow-none):
  *

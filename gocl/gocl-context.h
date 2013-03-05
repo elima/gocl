@@ -77,6 +77,9 @@ GoclBuffer *           gocl_context_create_buffer              (GoclContext  *se
 /* GoclDevice headers */
 GoclContext *          gocl_device_get_context                 (GoclDevice *device);
 
+/* GoclBuffer headers */
+GoclContext *          gocl_buffer_get_context                 (GoclBuffer *buffer);
+
 G_END_DECLS
 
 #endif /* __GOCL_CONTEXT_H__ */
