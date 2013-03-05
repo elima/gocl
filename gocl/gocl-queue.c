@@ -2,7 +2,7 @@
  * gocl-queue.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -32,7 +32,6 @@ struct _GoclQueuePrivate
 {
   cl_command_queue queue;
 
-  GoclContext *context;
   GoclDevice *device;
 
   guint flags;
@@ -42,7 +41,6 @@ struct _GoclQueuePrivate
 enum
 {
   PROP_0,
-  PROP_CONTEXT,
   PROP_DEVICE,
   PROP_FLAGS
 };
@@ -84,14 +82,6 @@ gocl_queue_class_init (GoclQueueClass *class)
   obj_class->get_property = get_property;
   obj_class->set_property = set_property;
 
-  g_object_class_install_property (obj_class, PROP_CONTEXT,
-                                   g_param_spec_object ("context",
-                                                        "Queue context",
-                                                        "The context this queue belongs to",
-                                                        GOCL_TYPE_CONTEXT,
-                                                        G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
-                                                        G_PARAM_STATIC_STRINGS));
-
   g_object_class_install_property (obj_class, PROP_DEVICE,
                                    g_param_spec_object ("device",
                                                         "Queue device",
@@ -129,8 +119,8 @@ gocl_queue_initable_init (GInitable     *initable,
   cl_context ctx;
   cl_device_id device_id;
 
-  ctx = gocl_context_get_context (self->priv->context);
-  device_id = (cl_device_id) gocl_device_get_id (self->priv->device);
+  ctx = gocl_context_get_context (gocl_device_get_context (self->priv->device));
+  device_id = gocl_device_get_id (self->priv->device);
 
   self->priv->queue = clCreateCommandQueue (ctx,
                                             device_id,
@@ -157,12 +147,6 @@ static void
 gocl_queue_dispose (GObject *obj)
 {
   GoclQueue *self = GOCL_QUEUE (obj);
-
-  if (self->priv->context != NULL)
-    {
-      g_object_unref (self->priv->context);
-      self->priv->context = NULL;
-    }
 
   if (self->priv->device != NULL)
     {
@@ -196,10 +180,6 @@ set_property (GObject      *obj,
 
   switch (prop_id)
     {
-    case PROP_CONTEXT:
-      self->priv->context = g_value_dup_object (value);
-      break;
-
     case PROP_DEVICE:
       self->priv->device = g_value_dup_object (value);
       break;
@@ -226,10 +206,6 @@ get_property (GObject    *obj,
 
   switch (prop_id)
     {
-    case PROP_CONTEXT:
-      g_value_set_object (value, self->priv->context);
-      break;
-
     case PROP_DEVICE:
       g_value_set_object (value, self->priv->device);
       break;

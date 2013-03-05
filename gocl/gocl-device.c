@@ -254,7 +254,6 @@ gocl_device_get_default_queue (GoclDevice *self, GError **error)
       self->priv->queue = g_initable_new (GOCL_TYPE_QUEUE,
                                           NULL,
                                           error,
-                                          "context", self->priv->context,
                                           "device", self,
                                           NULL);
     }
