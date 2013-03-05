@@ -237,6 +237,19 @@ gocl_queue_get_queue (GoclQueue *self)
 }
 
 /**
+ * gocl_queue_get_device:
+ *
+ * Returns: (transfer none):
+ **/
+GoclDevice *
+gocl_queue_get_device (GoclQueue *self)
+{
+  g_return_val_if_fail (GOCL_IS_QUEUE (self), NULL);
+
+  return self->priv->device;
+}
+
+/**
  * gocl_queue_get_flags:
  * @self: The #GoclQueue
  *

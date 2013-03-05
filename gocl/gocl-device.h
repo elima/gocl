@@ -63,6 +63,9 @@ gsize                  gocl_device_get_max_work_group_size    (GoclDevice  *self
 GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self,
                                                                GError     **error);
 
+/* GoclQueue headers */
+GoclDevice *           gocl_queue_get_device                 (GoclQueue *self);
+
 G_END_DECLS
 
 #endif /* __GOCL_DEVICE_H__ */
