@@ -20,6 +20,7 @@
  */
 
 #include <string.h>
+#include <gio/gio.h>
 
 #include "gocl-kernel.h"
 
@@ -43,6 +44,10 @@ enum
 };
 
 static void           gocl_kernel_class_init            (GoclKernelClass *class);
+static void           gocl_kernel_initable_iface_init   (GInitableIface *iface);
+static gboolean       gocl_kernel_initable_init         (GInitable     *initable,
+                                                         GCancellable  *cancellable,
+                                                         GError       **error);
 static void           gocl_kernel_init                  (GoclKernel *self);
 static void           gocl_kernel_finalize              (GObject *obj);
 
@@ -55,7 +60,9 @@ static void           get_property                       (GObject    *obj,
                                                           GValue     *value,
                                                           GParamSpec *pspec);
 
-G_DEFINE_TYPE (GoclKernel, gocl_kernel, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_CODE (GoclKernel, gocl_kernel, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                gocl_kernel_initable_iface_init));
 
 #define GOCL_KERNEL_GET_PRIVATE(obj)                    \
   (G_TYPE_INSTANCE_GET_PRIVATE ((obj),                  \
@@ -88,6 +95,30 @@ gocl_kernel_class_init (GoclKernelClass *class)
                                                         G_PARAM_STATIC_STRINGS));
 
   g_type_class_add_private (class, sizeof (GoclKernelPrivate));
+}
+
+static void
+gocl_kernel_initable_iface_init (GInitableIface *iface)
+{
+  iface->init = gocl_kernel_initable_init;
+}
+
+static gboolean
+gocl_kernel_initable_init (GInitable     *initable,
+                           GCancellable  *cancellable,
+                           GError       **error)
+{
+  GoclKernel *self = GOCL_KERNEL (initable);
+  cl_program program;
+  cl_int err_code = 0;
+
+  program = gocl_program_get_program (self->priv->program);
+
+  self->priv->kernel = clCreateKernel (program, self->priv->name, &err_code);
+  if (gocl_error_check_opencl (err_code, error))
+    return FALSE;
+
+  return TRUE;
 }
 
 static void
