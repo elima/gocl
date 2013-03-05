@@ -197,32 +197,6 @@ get_property (GObject    *obj,
 
 /* public */
 
-GoclKernel *
-gocl_kernel_new (GObject      *program,
-                 const gchar  *name,
-                 GError      **error)
-{
-  GoclKernel *self;
-  cl_int err_code;
-
-  g_return_val_if_fail (GOCL_IS_PROGRAM (program), NULL);
-  g_return_val_if_fail (name != NULL, NULL);
-
-  self = g_object_new (GOCL_TYPE_KERNEL,
-                       "program", GOCL_PROGRAM (program),
-                       "name", name,
-                       NULL);
-
-  self->priv->kernel =
-    clCreateKernel (gocl_program_get_program (GOCL_PROGRAM (program)),
-                    name,
-                    &err_code);
-  if (gocl_error_check_opencl (err_code, error))
-    return NULL;
-
-  return self;
-}
-
 /**
  * gocl_kernel_get_kernel:
  *

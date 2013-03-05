@@ -20,6 +20,7 @@
  */
 
 #include <string.h>
+#include <gio/gio.h>
 
 #include "gocl-program.h"
 
@@ -254,5 +255,10 @@ gocl_program_get_kernel (GoclProgram  *self,
   g_return_val_if_fail (GOCL_IS_PROGRAM (self), NULL);
   g_return_val_if_fail (kernel_name != NULL, NULL);
 
-  return gocl_kernel_new (G_OBJECT (self), kernel_name, error);
+  return GOCL_KERNEL (g_initable_new (GOCL_TYPE_KERNEL,
+                                      NULL,
+                                      error,
+                                      "program", self,
+                                      "name", kernel_name,
+                                      NULL));
 }

@@ -24,7 +24,6 @@
 
 #include <glib-object.h>
 
-#include <gocl-buffer.h>
 #include <gocl-device.h>
 #include <gocl-event.h>
 
@@ -54,10 +53,6 @@ struct _GoclKernelClass
 };
 
 GType                  gocl_kernel_get_type                   (void) G_GNUC_CONST;
-
-GoclKernel *           gocl_kernel_new                        (GObject      *program,
-                                                               const gchar  *name,
-                                                               GError      **error);
 
 cl_kernel              gocl_kernel_get_kernel                 (GoclKernel *self);
 
