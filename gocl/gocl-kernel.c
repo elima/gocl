@@ -376,5 +376,7 @@ gocl_kernel_run_in_device (GoclKernel  *self,
 
   gocl_event_set_event (_event, event);
 
+  gocl_event_idle_unref (_event);
+
   return _event;
 }
