@@ -2,7 +2,7 @@
  * gocl-program.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -23,6 +23,7 @@
 #define __GOCL_PROGRAM_H__
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include <CL/opencl.h>
 
 #include "gocl-context.h"
@@ -64,13 +65,21 @@ cl_program             gocl_program_get_program                (GoclProgram *sel
 
 GoclContext *          gocl_program_get_context                (GoclProgram *self);
 
-gboolean               gocl_program_build_sync                 (GoclProgram  *self,
-                                                                const gchar  *options,
-                                                                GError      **error);
-
 GoclKernel *           gocl_program_get_kernel                 (GoclProgram  *self,
                                                                 const gchar  *kernel_name,
                                                                 GError      **error);
+
+gboolean               gocl_program_build_sync                 (GoclProgram  *self,
+                                                                const gchar  *options,
+                                                                GError      **error);
+void                   gocl_program_build                      (GoclProgram         *self,
+                                                                const gchar         *options,
+                                                                GCancellable        *cancellable,
+                                                                GAsyncReadyCallback  callback,
+                                                                gpointer             user_data);
+gboolean               gocl_program_build_finish               (GoclProgram   *self,
+                                                                GAsyncResult  *result,
+                                                                GError       **error);
 
 G_END_DECLS
 

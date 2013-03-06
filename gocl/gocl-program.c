@@ -20,7 +20,6 @@
  */
 
 #include <string.h>
-#include <gio/gio.h>
 
 #include "gocl-program.h"
 
@@ -31,6 +30,8 @@ struct _GoclProgramPrivate
   cl_program program;
 
   GoclContext *context;
+
+  gboolean building;
 };
 
 /* properties */
@@ -89,6 +90,8 @@ gocl_program_init (GoclProgram *self)
   GoclProgramPrivate *priv;
 
   self->priv = priv = GOCL_PROGRAM_GET_PRIVATE (self);
+
+  priv->building = FALSE;
 }
 
 static void
@@ -151,6 +154,29 @@ get_property (GObject    *obj,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
     }
+}
+
+static void
+build_in_thread (GSimpleAsyncResult *res,
+                 GObject            *object,
+                 GCancellable       *cancellable)
+{
+  GoclProgram *self = GOCL_PROGRAM (object);
+  GError *error = NULL;
+  gchar *options;
+
+  options = g_simple_async_result_get_op_res_gpointer (res);
+
+  if (! gocl_program_build_sync (self,
+                                 options,
+                                 &error))
+    {
+      g_simple_async_result_take_error (res, error);
+    }
+
+  g_object_unref (res);
+
+  self->priv->building = FALSE;
 }
 
 /* public */
@@ -223,25 +249,6 @@ gocl_program_get_context (GoclProgram *self)
   return self->priv->context;
 }
 
-gboolean
-gocl_program_build_sync (GoclProgram  *self,
-                         const gchar  *options,
-                         GError      **error)
-{
-  cl_int err_code;
-
-  g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
-
-  err_code = clBuildProgram (self->priv->program,
-                             0,
-                             NULL,
-                             options,
-                             NULL,
-                             NULL);
-
-  return ! gocl_error_check_opencl (err_code, error);
-}
-
 /**
  * gocl_program_get_kernel:
  *
@@ -261,4 +268,82 @@ gocl_program_get_kernel (GoclProgram  *self,
                                       "program", self,
                                       "name", kernel_name,
                                       NULL));
+}
+
+gboolean
+gocl_program_build_sync (GoclProgram  *self,
+                         const gchar  *options,
+                         GError      **error)
+{
+  cl_int err_code;
+
+  g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
+
+  err_code = clBuildProgram (self->priv->program,
+                             0,
+                             NULL,
+                             options,
+                             NULL,
+                             NULL);
+
+  return ! gocl_error_check_opencl (err_code, error);
+}
+
+void
+gocl_program_build (GoclProgram         *self,
+                    const gchar         *options,
+                    GCancellable        *cancellable,
+                    GAsyncReadyCallback  callback,
+                    gpointer             user_data)
+{
+  GSimpleAsyncResult *res;
+
+  g_return_if_fail (GOCL_IS_PROGRAM (self));
+
+  res = g_simple_async_result_new (G_OBJECT (self),
+                                   callback,
+                                   user_data,
+                                   gocl_program_build);
+
+  if (self->priv->building)
+    {
+      g_simple_async_result_set_error (res,
+                                       G_IO_ERROR,
+                                       G_IO_ERROR_PENDING,
+                                       "A previous build operation is pending");
+      g_simple_async_result_complete_in_idle (res);
+      g_object_unref (res);
+    }
+  else
+    {
+      self->priv->building = TRUE;
+
+      if (options == NULL)
+        options = "";
+
+      g_simple_async_result_set_op_res_gpointer (res,
+                                                 g_strdup (options),
+                                                 g_free);
+
+      g_simple_async_result_run_in_thread (res,
+                                           build_in_thread,
+                                           G_PRIORITY_DEFAULT,
+                                           cancellable);
+    }
+}
+
+gboolean
+gocl_program_build_finish (GoclProgram   *self,
+                           GAsyncResult  *result,
+                           GError       **error)
+{
+  g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
+  g_return_val_if_fail (g_simple_async_result_is_valid (result,
+                                                        G_OBJECT (self),
+                                                        gocl_program_build),
+                        FALSE);
+
+  return
+    ! g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (result),
+                                             error);
 }
