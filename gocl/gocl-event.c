@@ -40,6 +40,7 @@ struct _GoclEventPrivate
   GThread *thread;
 
   gint complete_src_id;
+  gint unref_src_id;
 };
 
 typedef struct
@@ -131,6 +132,9 @@ gocl_event_init (GoclEvent *self)
 
   priv->closure_list = NULL;
   priv->thread = NULL;
+
+  priv->complete_src_id = 0;
+  priv->unref_src_id = 0;
 }
 
 static void
@@ -286,6 +290,8 @@ notify_event_completed_in_caller_context (gpointer user_data)
 
   free_closure (closure);
 
+  g_object_unref (self);
+
   return FALSE;
 }
 
@@ -333,6 +339,16 @@ wait_event_thread_func (gpointer user_data)
                self);
 
   return NULL;
+}
+
+static gboolean
+unref_in_idle (gpointer user_data)
+{
+  GoclEvent *self = GOCL_EVENT (user_data);
+
+  g_object_unref (self);
+
+  return FALSE;
 }
 
 /* public */
@@ -416,6 +432,8 @@ gocl_event_then (GoclEvent         *self,
   closure->context = g_main_context_get_thread_default ();
   closure->self = g_object_ref (self);
 
+  g_object_ref (self);
+
   if (self->priv->already_resolved)
     {
       timeout_add (closure->context,
@@ -477,4 +495,19 @@ gocl_event_list_to_array (GList *event_list, gsize *len)
     }
 
   return event_arr;
+}
+
+void
+gocl_event_idle_unref (GoclEvent *self)
+{
+  g_return_if_fail (GOCL_IS_EVENT (self));
+
+  if (self->priv->unref_src_id != 0)
+    return;
+
+  self->priv->unref_src_id = timeout_add (NULL,
+                                          0,
+                                          G_PRIORITY_LOW,
+                                          unref_in_idle,
+                                          self);
 }

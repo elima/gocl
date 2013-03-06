@@ -75,6 +75,8 @@ void                   gocl_event_then                       (GoclEvent         
 cl_event *             gocl_event_list_to_array              (GList *event_list,
                                                               gsize *len);
 
+void                   gocl_event_idle_unref                 (GoclEvent *self);
+
 G_END_DECLS
 
 #endif /* __GOCL_EVENT_H__ */
