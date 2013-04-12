@@ -48,7 +48,6 @@ enum
 static void           gocl_device_class_init            (GoclDeviceClass *class);
 static void           gocl_device_init                  (GoclDevice *self);
 static void           gocl_device_dispose               (GObject *obj);
-static void           gocl_device_finalize              (GObject *obj);
 
 static void           set_property                      (GObject      *obj,
                                                          guint         prop_id,
@@ -72,7 +71,6 @@ gocl_device_class_init (GoclDeviceClass *class)
   GObjectClass *obj_class = G_OBJECT_CLASS (class);
 
   obj_class->dispose = gocl_device_dispose;
-  obj_class->finalize = gocl_device_finalize;
   obj_class->get_property = get_property;
   obj_class->set_property = set_property;
 
@@ -123,14 +121,6 @@ gocl_device_dispose (GObject *obj)
     }
 
   G_OBJECT_CLASS (gocl_device_parent_class)->dispose (obj);
-}
-
-static void
-gocl_device_finalize (GObject *obj)
-{
-  /*  GoclDevice *self = GOCL_DEVICE (obj); */
-
-  G_OBJECT_CLASS (gocl_device_parent_class)->finalize (obj);
 }
 
 static void
