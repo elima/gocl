@@ -19,6 +19,23 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-device
+ * @short_description: Object that represents an OpenCL capable device
+ * @stability: Unstable
+ *
+ * A #GoclDevice object is not normally created directly. Instead, it is
+ * obtained from a #GoclContext by calling any of gocl_context_get_device_by_index(),
+ * gocl_context_get_default_gpu() or gocl_context_get_default_cpu().
+ *
+ * To obtain the work group size of a device, gocl_device_get_max_work_group_size()
+ * is used.
+ *
+ * To enqueue operations on this device, a #GoclQueue provides a default command queue
+ * which is obtained by calling gocl_device_get_default_queue(). More device queues can
+ * be created by passing this object as 'device' property in the #GoclQueue constructor.
+ **/
+
 #include <gio/gio.h>
 
 #include "gocl-device.h"
@@ -179,8 +196,11 @@ get_property (GObject    *obj,
 
 /**
  * gocl_device_get_id:
+ * @self: The #GoclDevice
  *
- * Returns: (transfer none) (type guint64):
+ * Returns the internal #cl_device_id.
+ *
+ * Returns: (transfer none) (type guint64): The device id
  **/
 cl_device_id
 gocl_device_get_id (GoclDevice *self)
@@ -192,17 +212,34 @@ gocl_device_get_id (GoclDevice *self)
 
 /**
  * gocl_device_get_context:
+ * @device: The #GoclDevice
  *
- * Returns: (transfer none):
+ * Obtain the #GoclContext the device belongs to.
+ *
+ * Returns: (transfer none): A #GoclContext. The returned object is owned by
+ *   the device, do not free.
  **/
 GoclContext *
-gocl_device_get_context (GoclDevice *self)
+gocl_device_get_context (GoclDevice *device)
 {
-  g_return_val_if_fail (GOCL_IS_DEVICE (self), NULL);
+  g_return_val_if_fail (GOCL_IS_DEVICE (device), NULL);
 
-  return self->priv->context;
+  return device->priv->context;
 }
 
+/**
+ * gocl_device_get_max_work_group_size:
+ * @self: The #GoclDevice
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * This method retrieves the maximum work group size for the device,
+ * by querying the @CL_DEVICE_MAX_WORK_GROUP_SIZE info key through
+ * clGetDeviceInfo().
+ * Upon success a value greater than zero is returned, otherwise zero
+ * is returned and @error is filled with an error from OpenCL domain.
+ *
+ * Returns: The maximum size of the work group for this device.
+ **/
 gsize
 gocl_device_get_max_work_group_size (GoclDevice *self, GError **error)
 {
@@ -229,10 +266,10 @@ gocl_device_get_max_work_group_size (GoclDevice *self, GError **error)
  * @self: The #GoclDevice
  * @error: (out) (allow-none) (transfer full): A pointer to a #GError, or %NULL
  *
- * Returns a #GoclQueue command queue associated with this device, or error if
- *   a command queue cannot be created.
+ * Returns a #GoclQueue command queue associated with this device, or %NULL upon
+ * error, in which case @error is filled accordingly.
  *
- * Returns: (transfer none): A #GoclQueue object, which is owned  by the device
+ * Returns: (transfer none): A #GoclQueue object, which is owned by the device
  *   and should not be freed.
  **/
 GoclQueue *
