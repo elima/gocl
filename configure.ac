@@ -123,6 +123,8 @@ AC_OUTPUT([
         gocl/gocl-0.1.pc
         gocl/Makefile
         examples/Makefile
+        doc/Makefile
+        doc/reference/Makefile
 ])
 
 echo ""

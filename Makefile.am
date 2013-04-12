@@ -1,10 +1,12 @@
 SUBDIRS = \
 	gocl \
-	examples
+	examples \
+	doc
 
 DIST_SUBDIRS = \
 	gocl \
-	examples
+	examples \
+	doc
 
 EXTRA_DIST = \
 	autogen.sh \
