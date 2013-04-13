@@ -2,7 +2,7 @@
  * gocl-context.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -18,6 +18,30 @@
  * Lesser General Public License at http://www.gnu.org/licenses/lgpl-3.0.txt
  * for more details.
  */
+
+/**
+ * SECTION:gocl-context
+ * @short_description: Object that represents an OpenCL context
+ * @stability: Unstable
+ *
+ * A #GoclContext enables access to OpenCL objects such as devices, command
+ * queues, buffers, programs, kernels, etc. Obtaining a #GoclContext is always
+ * the first step an OpenCL application performs.
+ *
+ * A #GoclContext can be created with gocl_context_new(), providing the type of
+ * device which is a value from #GoclDeviceType. For convenience, the methods
+ * gocl_context_get_default_cpu() and gocl_context_get_default_gpu() are
+ * provided to easily retrieve pre-created CPU and GPU contexts, respectively.
+ *
+ * Once a context is successfully created, devices can be obtained by calling
+ * gocl_context_get_device_by_index(), where index must be a value between 0 and
+ * the maximum number of devices in the context, minus one. Number of devices can
+ * be obtained with gocl_context_get_num_devices().
+ *
+ * Memory buffers can be created in context's memory to that kernels can access
+ * and share them during execution. To create a buffer,
+ * gocl_context_create_buffer() method is provided.
+ **/
 
 #include <string.h>
 #include <gio/gio.h>
@@ -235,8 +259,14 @@ get_property (GObject    *obj,
 
 /**
  * gocl_context_new:
+ * @device_type: A value from #GoclDeviceType
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Returns: (transfer full):
+ * Attempts to create a #GoclContext of the type specified in @device_type.
+ * Upon error, %NULL is returned and @error is filled accordingly. On success,
+ * a new #GoclContext object is returned.
+ *
+ * Returns: (transfer full): A newly created #GoclContext
  **/
 GoclContext *
 gocl_context_new (GoclDeviceType device_type, GError **error)
@@ -250,8 +280,14 @@ gocl_context_new (GoclDeviceType device_type, GError **error)
 
 /**
  * gocl_context_get_default_gpu:
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Returns: (transfer full):
+ * Returns platform's default GPU context. The first call to this method will
+ * attempt to create a new #GoclContext using a device type of
+ * %GOCL_DEVICE_TYPE_GPU. Upon success, the context is cached and subsequent calls
+ * will return the same object, increasing its reference count.
+ *
+ * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
 gocl_context_get_default_gpu (GError **error)
@@ -266,8 +302,14 @@ gocl_context_get_default_gpu (GError **error)
 
 /**
  * gocl_context_get_default_cpu:
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Returns: (transfer full):
+ * Returns platform's default CPU context. The first call to this method will
+ * attempt to create a new #GoclContext using a device type of
+ * %GOCL_DEVICE_TYPE_CPU. Upon success, the context is cached and subsequent calls
+ * will return the same object, increasing its reference count.
+ *
+ * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
 gocl_context_get_default_cpu (GError **error)
@@ -282,8 +324,12 @@ gocl_context_get_default_cpu (GError **error)
 
 /**
  * gocl_context_get_context:
+ * @self: The #GoclContext
  *
- * Returns: (transfer none) (type guint):
+ * Obtains the internal OpenCL #cl_context. This is not normally called
+ * by applications. It is rather a low-level, internal API.
+ *
+ * Returns: (transfer none) (type guint): The internal #cl_context
  **/
 cl_context
 gocl_context_get_context (GoclContext *self)
@@ -294,8 +340,14 @@ gocl_context_get_context (GoclContext *self)
 }
 
 /**
- * gocl_context_count_devices:
+ * gocl_context_get_num_devices:
+ * @self: The #GoclContext
  *
+ * Obtains the number of devices in this context. Calls to
+ * gocl_context_get_device_by_index() must provide a device index between
+ * 0 and the number of devices returned by this method, minus one.
+ *
+ * Returns: The number of devices
  **/
 guint
 gocl_context_get_num_devices (GoclContext *self)
@@ -307,8 +359,16 @@ gocl_context_get_num_devices (GoclContext *self)
 
 /**
  * gocl_context_get_device_by_index:
+ * @self: The #GoclContext
+ * @device_index: The index of the device to retrieve
  *
- * Returns: (transfer full):
+ * Retrieves the @device_index-th device from the list of context devices.
+ * Use gocl_context_get_num_devices() to get the number of devices in the
+ * context.
+ *
+ * Notice that method creates a new #GoclDevice instance every time is called.
+ *
+ * Returns: (transfer full): A newly created #GoclDevice
  **/
 GoclDevice *
 gocl_context_get_device_by_index (GoclContext *self, guint device_index)
@@ -328,8 +388,16 @@ gocl_context_get_device_by_index (GoclContext *self, guint device_index)
 
 /**
  * gocl_context_create_buffer:
+ * @self: The #GoclContext
+ * @flags: An OR'ed combination of values from #GoclBufferFlags
+ * @size: The size of the buffer, in bytes
+ * @host_ptr: (allow-none) (type guint64): A pointer to memory in the host system, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Returns: (transfer full):
+ * Creates a new buffer on context's memory. Depending on flags, the @host_ptr pointer can be
+ * used to initialize the contents of the buffer from a block of memory in the host.
+ *
+ * Returns: (transfer full): A newly created #GoclBuffer, or %NULL on error
  **/
 GoclBuffer *
 gocl_context_create_buffer (GoclContext  *self,

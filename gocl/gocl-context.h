@@ -56,7 +56,7 @@ struct _GoclContextClass
 
 GType                  gocl_context_get_type                   (void) G_GNUC_CONST;
 
-GoclContext *          gocl_context_new                        (GoclDeviceType   type,
+GoclContext *          gocl_context_new                        (GoclDeviceType   device_type,
                                                                 GError         **error);
 GoclContext *          gocl_context_get_default_cpu            (GError **error);
 GoclContext *          gocl_context_get_default_gpu            (GError **error);
