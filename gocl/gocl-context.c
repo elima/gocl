@@ -197,11 +197,11 @@ gocl_context_finalize (GObject *obj)
   GoclContext *self = GOCL_CONTEXT (obj);
   gint i;
 
-  clReleaseContext (self->priv->context);
-
   for (i=0; i<self->priv->num_devices; i++)
     if (self->priv->queues[i] != NULL)
       clReleaseCommandQueue (self->priv->queues[i]);
+
+  clReleaseContext (self->priv->context);
 
   G_OBJECT_CLASS (gocl_context_parent_class)->finalize (obj);
 
