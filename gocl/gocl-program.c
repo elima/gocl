@@ -19,6 +19,28 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-program
+ * @short_description: Object that represents an OpenCL program
+ * @stability: Unstable
+ *
+ * A #GoclProgram allows to transform OpenCL source code into kernel objects
+ * that can run on OpenCL runtimes.
+ *
+ * A #GoclProgram is created with gocl_program_new(), provinding a
+ * null-terminated array of strings, each one representing OpenCL source code.
+ * Currently, creating a program from pre-compiled, binary code is not supported,
+ * but will be in the future.
+ *
+ * Once a program is created, it needs to be built before kernels can be created
+ * from it. To build a program asynchronously, gocl_program_build() and
+ * gocl_program_build_finish() methods are provided. For building synchronously,
+ * gocl_program_build_sync() is used.
+ *
+ * Once a program is successfully built, kernels can be obtained from it using
+ * gocl_program_get_kernel() method.
+ **/
+
 #include <string.h>
 
 #include "gocl-program.h"
@@ -97,7 +119,7 @@ gocl_program_init (GoclProgram *self)
 static void
 gocl_program_constructed (GObject *obj)
 {
-  //GoclProgram *self = GOCL_PROGRAM (obj);
+  /* GoclProgram *self = GOCL_PROGRAM (obj); */
 }
 
 static void
@@ -184,14 +206,15 @@ build_in_thread (GSimpleAsyncResult *res,
 /**
  * gocl_program_new:
  * @context: The #GoclContext
- * @sources: (array length=num_sources) (type utf8): Array of source code null
- * terminated strings
+ * @sources: (array length=num_sources) (type utf8): Array of source code
+ * null-terminated strings
  * @num_sources: The number of elements in @sources
- * @error: (out) (allow-none): A #GError pointer
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Creates a new #GoclProgram.
+ * Creates and returns a new #GoclProgram. Upon error, %NULL is returned and
+ * @error is filled accordingly.
  *
- * Returns: (transfer full):
+ * Returns: (transfer full): A newly created #GoclProgram
  **/
 GoclProgram *
 gocl_program_new (GoclContext  *context,
@@ -225,8 +248,12 @@ gocl_program_new (GoclContext  *context,
 
 /**
  * gocl_program_get_program:
+ * @self: The #GoclProgram
  *
- * Returns: (transfer none) (type guint64):
+ * Retrieves the OpenCL internal #cl_program object. This is not normally called
+ * by applications. It is rather a low-level, internal API.
+ *
+ * Returns: (transfer none) (type guint64): The internal #cl_program
  **/
 cl_program
 gocl_program_get_program (GoclProgram *self)
@@ -238,8 +265,12 @@ gocl_program_get_program (GoclProgram *self)
 
 /**
  * gocl_program_get_context:
+ * @self: The #GoclProgram
  *
- * Returns: (transfer none):
+ * Obtain the #GoclContext the program belongs to.
+ *
+ * Returns: (transfer none): A #GoclContext. The returned object is owned by
+ *   the program, do not free.
  **/
 GoclContext *
 gocl_program_get_context (GoclProgram *self)
@@ -251,8 +282,16 @@ gocl_program_get_context (GoclProgram *self)
 
 /**
  * gocl_program_get_kernel:
+ * @self: The #GoclProgram
+ * @kernel_name: A string representing the name of a kernel function
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Returns: (transfer full):
+ * Creates and retrieves a new #GoclKernel object from a kernel function
+ * in the source code, specified by @kernel_name string. Upon success,
+ * a new #GoclKernel is returned, otherwise %NULL is returned and @error
+ * is filled accordingly.
+ *
+ * Returns: (transfer full): A newly created #GoclKernel object
  **/
 GoclKernel *
 gocl_program_get_kernel (GoclProgram  *self,
@@ -270,6 +309,23 @@ gocl_program_get_kernel (GoclProgram  *self,
                                       NULL));
 }
 
+/**
+ * gocl_program_build_sync:
+ * @self: The #GoclProgram
+ * @options: A string specifying OpenCL program build options
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Builds the program using the build options specified in
+ * @options. This method is blocking. For an asynchronous version,
+ * gocl_program_build() is provided. On error, %FALSE is returned and
+ * @error is filled accordingly.
+ *
+ * A detailed description of the build options is available at Kronos
+ * documentation website:
+ * http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clBuildProgram.html
+ *
+ * Returns: %TRUE on success or %FALSE on error
+ **/
 gboolean
 gocl_program_build_sync (GoclProgram  *self,
                          const gchar  *options,
@@ -289,6 +345,22 @@ gocl_program_build_sync (GoclProgram  *self,
   return ! gocl_error_check_opencl (err_code, error);
 }
 
+/**
+ * gocl_program_build:
+ * @self: The #GoclProgram
+ * @options: A string specifying OpenCL program build options
+ * @cancellable: (allow-none): A #GCancellable object, or %NULL
+ * @callback: (allow-none): Callback to be called upon completion, or %NULL
+ * @user_data: (allow-none): Arbitrary data to pass in @callback, or %NULL
+ *
+ * Builds the program using the build options specified in
+ * @options. This method is non-blocking. If @callback is provided, it will
+ * be called when the operation completes, and gocl_program_build_finish()
+ * can be used within the callback to retrieve the result of the operation.
+ *
+ * A #GCancellable object can be passed in @cancellable to allow cancelling
+ * the operation.
+ **/
 void
 gocl_program_build (GoclProgram         *self,
                     const gchar         *options,
@@ -332,6 +404,17 @@ gocl_program_build (GoclProgram         *self,
     }
 }
 
+/**
+ * gocl_program_build_finish:
+ * @self: The #GoclProgram
+ * @result: The #GAsyncResult object from callback's arguments
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Retrieves the result of a gocl_program_build() asynchronous operation.
+ * On error, %FALSE is returned and @error is filled accordingly.
+ *
+ * Returns: %TRUE on success, or %FALSE on error
+ **/
 gboolean
 gocl_program_build_finish (GoclProgram   *self,
                            GAsyncResult  *result,
