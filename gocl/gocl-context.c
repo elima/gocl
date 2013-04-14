@@ -326,10 +326,10 @@ gocl_context_get_default_cpu (GError **error)
  * gocl_context_get_context:
  * @self: The #GoclContext
  *
- * Obtains the internal OpenCL #cl_context. This is not normally called
- * by applications. It is rather a low-level, internal API.
+ * Retrieves the internal OpenCL #cl_context object. This is not normally
+ * called by applications. It is rather a low-level, internal API.
  *
- * Returns: (transfer none) (type guint): The internal #cl_context
+ * Returns: (transfer none) (type guint): The internal #cl_context object
  **/
 cl_context
 gocl_context_get_context (GoclContext *self)
