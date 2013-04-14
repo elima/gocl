@@ -19,6 +19,32 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-kernel
+ * @short_description: Object that represents an OpenCL kernel
+ * @stability: Unstable
+ *
+ * A #GoclKernel object represents a special type of functions in OpenCL
+ * programs, that allows for host code to set its arguments and invoke the
+ * function.
+ *
+ * A #GoclKernel is not created directly. Instead, it is obtained from a
+ * #GoclProgram by calling gocl_program_get_kernel() method.
+ *
+ * Before a kernel object can be executed, all its arguments must be set.
+ * Several methods are provided for this purpose, and depending on the type
+ * of the argument to set, one or other is used.
+ * gocl_kernel_set_argument_int32() and gocl_kernel_set_argument_buffer() are
+ * examples of such methods. More will be added soon.
+ *
+ * Once all arguments are set, the kernel is ready to be executed on a device.
+ * For this, the gocl_kernel_run_in_device() is used for non-blocking execution,
+ * and gocl_kernel_run_in_device_sync() for a blocking version. Notice that
+ * these methods will use the device's default command queue. In the future,
+ * methods will be provided to run the kernel on arbitrary command queues
+ * as well.
+ **/
+
 #include <string.h>
 #include <gio/gio.h>
 
@@ -199,8 +225,12 @@ get_property (GObject    *obj,
 
 /**
  * gocl_kernel_get_kernel:
+ * @self: The #GoclKernel
  *
- * Returns: (transfer none) (type guint64):
+ * Retrieves the internal OpenCL #cl_kernel object. This is not normally
+ * called by applications. It is rather a low-level, internal API.
+ *
+ * Returns: (transfer none) (type guint64): The internal #cl_kernel object
  **/
 cl_kernel
 gocl_kernel_get_kernel (GoclKernel *self)
@@ -212,14 +242,22 @@ gocl_kernel_get_kernel (GoclKernel *self)
 
 /**
  * gocl_kernel_set_argument_int32:
- * @buf: (array length=num_elements) (element-type guint32):
+ * @self: The #GoclKernel
+ * @index: The index of this argument in the kernel function
+ * @num_elements: The number of int32 elements in @buffer
+ * @buffer: (array length=num_elements) (element-type guint32): Array of int32
+ * values
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
+ * Sets the value of the kernel argument at @index, as an array of int32.
+ *
+ * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_kernel_set_argument_int32 (GoclKernel  *self,
                                 guint        index,
                                 gsize        num_elements,
-                                gint32      *buf,
+                                gint32      *buffer,
                                 GError     **error)
 {
   cl_int err_code;
@@ -229,15 +267,21 @@ gocl_kernel_set_argument_int32 (GoclKernel  *self,
   err_code = clSetKernelArg (self->priv->kernel,
                              index,
                              sizeof (gint32) * num_elements,
-                             buf);
+                             buffer);
 
   return ! gocl_error_check_opencl (err_code, error);
 }
 
 /**
- * gocl_kernel_set_argument_int32:
- * @buf: (array length=num_elements) (element-type guint32):
+ * gocl_kernel_set_argument_buffer:
+ * @self: The #GoclKernel
+ * @index: The index of this argument in the kernel function
+ * @buffer: A #GoclBuffer
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
+ * Sets the value of the kernel argument at @index, as a buffer object.
+ *
+ * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_kernel_set_argument_buffer (GoclKernel  *self,
@@ -262,8 +306,22 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
 
 /**
  * gocl_kernel_run_in_device_sync:
- * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ * @self: The #GoclKernel
+ * @device: A #GoclDevice to run the kernel on
+ * @global_work_size: The global work group size
+ * @local_work_size: The local work group size
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List of #GoclEvent
+ * events to wait for, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
+ * Runs the kernel on the specified device, blocking the program
+ * until the kernel execution finishes. For non-blocking version,
+ * gocl_kernel_run_in_device() is provided.
+ *
+ * If @event_wait_list is provided, the kernel execution will start
+ * only when all the events in the list have triggered.
+ *
+ * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_kernel_run_in_device_sync (GoclKernel  *self,
@@ -313,9 +371,22 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
 
 /**
  * gocl_kernel_run_in_device:
- * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ * @self: The #GoclKernel
+ * @device: A #GoclDevice to run the kernel on
+ * @global_work_size: The global work group size
+ * @local_work_size: The local work group size
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List of #GoclEvent
+ * events to wait for, or %NULL
  *
- * Returns: (transfer none):
+ * Runs the kernel on the specified device, asynchronously. A #GoclEvent
+ * is returned, and can be used to get notified when the execution finishes,
+ * or as wait event input to other operations on the device.
+ *
+ * If @event_wait_list is provided, the kernel execution will start
+ * only when all the events in the list have triggered.
+ *
+ * Returns: (transfer none): A #GoclEvent to get notified when execution
+ * finishes
  **/
 GoclEvent *
 gocl_kernel_run_in_device (GoclKernel  *self,

@@ -59,7 +59,7 @@ cl_kernel              gocl_kernel_get_kernel                 (GoclKernel *self)
 gboolean               gocl_kernel_set_argument_int32         (GoclKernel  *self,
                                                                guint        index,
                                                                gsize        num_elements,
-                                                               gint32      *buf,
+                                                               gint32      *buffer,
                                                                GError     **error);
 gboolean               gocl_kernel_set_argument_buffer        (GoclKernel  *self,
                                                                guint        index,
