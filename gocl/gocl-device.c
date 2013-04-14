@@ -214,7 +214,7 @@ gocl_device_get_id (GoclDevice *self)
  * gocl_device_get_context:
  * @device: The #GoclDevice
  *
- * Obtain the #GoclContext the device belongs to.
+ * Obtains the #GoclContext the device belongs to.
  *
  * Returns: (transfer none): A #GoclContext. The returned object is owned by
  *   the device, do not free.
@@ -232,7 +232,7 @@ gocl_device_get_context (GoclDevice *device)
  * @self: The #GoclDevice
  * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * This method retrieves the maximum work group size for the device,
+ * Retrieves the maximum work group size for the device,
  * by querying the @CL_DEVICE_MAX_WORK_GROUP_SIZE info key through
  * clGetDeviceInfo().
  * Upon success a value greater than zero is returned, otherwise zero
