@@ -49,8 +49,9 @@
       <xi:include href="xml/gocl-device.xml"/>
       <xi:include href="xml/gocl-program.xml"/>
       <xi:include href="xml/gocl-kernel.xml"/>
-      <xi:include href="xml/gocl-queue.xml"/>
       <xi:include href="xml/gocl-buffer.xml"/>
+      <xi:include href="xml/gocl-queue.xml"/>
+      <xi:include href="xml/gocl-event.xml"/>
       <xi:include href="xml/gocl-error.xml"/>
     </chapter>
   </part>
