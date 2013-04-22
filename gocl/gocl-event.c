@@ -354,20 +354,6 @@ unref_in_idle (gpointer user_data)
 /* public */
 
 /**
- * gocl_event_set_event:
- * @event: (type guint64):
- *
- **/
-void
-gocl_event_set_event (GoclEvent *self, cl_event event)
-{
-  g_return_if_fail (GOCL_IS_EVENT (self));
-  g_return_if_fail (event != NULL);
-
-  self->priv->event = event;
-}
-
-/**
  * gocl_event_get_event:
  *
  * Returns: (transfer none) (type guint64):
