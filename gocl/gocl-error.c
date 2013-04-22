@@ -2,7 +2,7 @@
  * gocl-error.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -77,14 +77,14 @@ get_error_code_description (cl_int err_code)
 
 /**
  * gocl_error_check_opencl:
- * @err_code: (type guint64): An OpenCL error code.
- * @error: (out) (allow-none): A pointer to a #GError.
+ * @err_code: (type guint64): An OpenCL error code
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Checks if @err_code describes an OpenCL error and fills @error pointer
- * (if not %NULL), with a new #GError with the corresponding domain, code
+ * Checks if @err_code describes an OpenCL error and fills @error pointer,
+ * if not %NULL, with a new #GError with the corresponding domain, code
  * and description.
  *
- * Returns: %TRUE if there is an error, %FALSE otherwise.
+ * Returns: %TRUE if there is an error, %FALSE otherwise
  **/
 gboolean
 gocl_error_check_opencl (cl_int err_code, GError **error)
