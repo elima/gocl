@@ -44,6 +44,23 @@ typedef enum
   GOCL_DEVICE_TYPE_ALL         = CL_DEVICE_TYPE_ALL
 } GoclDeviceType;
 
+/**
+ * GoclBufferFlags:
+ * @GOCL_BUFFER_FLAGS_READ_WRITE:     The buffer can be read and written by a
+ *                                    kernel. This is the default.
+ * @GOCL_BUFFER_FLAGS_WRITE_ONLY:     The buffer can be written but not read
+ *                                    by a kernel. Reading from the buffer
+ *                                    inside a kernel is undefined.
+ * @GOCL_BUFFER_FLAGS_USE_HOST_PTR:   The buffer is initialized with the data
+ *                                    referenced by the provided host memory
+ *                                    pointer.
+ * @GOCL_BUFFER_FLAGS_ALLOC_HOST_PTR: The buffer is allocated from host
+ *                                    accessible memory.
+ * @GOCL_BUFFER_FLAGS_COPY_HOST_PTR:  The buffer is allocated from host
+ *                                    accessible memory, and initialized with
+ *                                    the data referenced by the provided host
+ *                                    memory pointer.
+ **/
 typedef enum
 {
   GOCL_BUFFER_FLAGS_READ_WRITE     = CL_MEM_READ_WRITE,
