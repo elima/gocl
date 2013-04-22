@@ -34,8 +34,9 @@
  * Before a kernel object can be executed, all its arguments must be set.
  * Several methods are provided for this purpose, and depending on the type
  * of the argument to set, one or other is used.
- * gocl_kernel_set_argument_int32() and gocl_kernel_set_argument_buffer() are
- * examples of such methods. More will be added soon.
+ * gocl_kernel_set_argument(), gocl_kernel_set_argument_int32() and
+ * gocl_kernel_set_argument_buffer() are examples of such methods.
+ * More will be added soon.
  *
  * Once all arguments are set, the kernel is ready to be executed on a device.
  * For this, the gocl_kernel_run_in_device() is used for non-blocking execution,
