@@ -19,6 +19,30 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-buffer
+ * @short_description: Object that represents a block of memory in an OpenCL
+ * context
+ * @stability: Unstable
+ *
+ * A #GoclBuffer represents a buffer object in an OpenCL context. These objects
+ * are directly accessible from OpenCL programs.
+ *
+ * Buffers are created from a #GoclContext, by calling
+ * gocl_context_create_buffer() method. It is possible to initialize the
+ * contents of the buffer upon creating, by specifying a block of host memory
+ * to copy data from, and the appropriate flag from #GoclBufferFlags.
+ * Also, buffers can be initialized at any time by calling
+ * gocl_buffer_write_sync().
+ *
+ * To read data from a buffer into host memory, gocl_buffer_read_sync() method
+ * is provided. This is normally used after the execution of a kernel that
+ * affected the contents of the buffer.
+ *
+ * Both gocl_buffer_write_sync() and gocl_buffer_read_sync() are block program
+ * execution. Asynchronous function will shortly be provided as well.
+ **/
+
 #include <string.h>
 #include <gio/gio.h>
 
@@ -223,8 +247,12 @@ get_property (GObject    *obj,
 
 /**
  * gocl_buffer_get_buffer:
+ * @self: The #GoclBuffer
  *
- * Returns: (type guint64) (transfer none):
+ * Retrieves the internal OpenCL #cl_mem object. This is not normally
+ * called by applications. It is rather a low-level, internal API.
+ *
+ * Returns: (type guint64) (transfer none): The internal #cl_mem object
  **/
 cl_mem
 gocl_buffer_get_buffer (GoclBuffer *self)
@@ -236,21 +264,39 @@ gocl_buffer_get_buffer (GoclBuffer *self)
 
 /**
  * gocl_buffer_get_context:
+ * @buffer: The #GoclBuffer
  *
- * Returns: (transfer none):
+ * Retrieves the #GoclContext the buffer belongs to.
+ *
+ * Returns: (transfer none): A #GoclContext object
  **/
 GoclContext *
-gocl_buffer_get_context (GoclBuffer *self)
+gocl_buffer_get_context (GoclBuffer *buffer)
 {
-  g_return_val_if_fail (GOCL_IS_BUFFER (self), NULL);
+  g_return_val_if_fail (GOCL_IS_BUFFER (buffer), NULL);
 
-  return self->priv->context;
+  return buffer->priv->context;
 }
 
 /**
  * gocl_buffer_read_sync:
- * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @target_ptr: (array length=size) (element-type guint8): The pointer to copy
+ * the data to
+ * @size: The size of the data to be read
+ * @offset: The offset to start reading from
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
+ * Reads a block of data of @size bytes from remote context into host memory,
+ * starting at @offset. The operation is actually enqueued in @queue, and
+ * the program execution blocks until the read finishes. If @event_wait_list
+ * is provided, the read operation will start only when all the #GoclEvent in
+ * the list have triggered.
+ *
+ * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_buffer_read_sync (GoclBuffer  *self,
@@ -289,8 +335,22 @@ gocl_buffer_read_sync (GoclBuffer  *self,
 
 /**
  * gocl_buffer_write_sync:
- * @event_wait_list: (element-type Gocl.Event) (allow-none):
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @data: A pointer to write data from
+ * @size: The size of the data to be written
+ * @offset: The offset to start writing data to
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
+ * Writes a block of data of @size bytes from host memory into remote context
+ * memory, starting at @offset. The operation is actually enqueued in @queue, and
+ * the program execution blocks until the read finishes. If @event_wait_list
+ * is provided, the read operation will start only when all the #GoclEvent in
+ * the list have triggered.
+ *
+ * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_buffer_write_sync (GoclBuffer      *self,
