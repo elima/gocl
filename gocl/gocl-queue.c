@@ -19,6 +19,22 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-queue
+ * @short_description: Object that represents an OpenCL command queue
+ * @stability: Unstable
+ *
+ * A #GoclQueue represents an OpenCL command queue that is created from a
+ * device, using gocl_device_get_default_queue(). Currently, there is no
+ * API for creating command queues directly, but that can change as soon
+ * as practical use cases require it.
+ *
+ * For API simplicity, operations on a command queue are handled
+ * elsewhere, like gocl_kernel_run_in_device(), which internally enqueues
+ * the execution; or gocl_buffer_read_sync() and gocl_buffer_write_sync(), which
+ * internally enqueues read/write operations on the command queue.
+ **/
+
 #include <gio/gio.h>
 
 #include "gocl-queue.h"
@@ -226,7 +242,11 @@ get_property (GObject    *obj,
  * gocl_queue_get_queue:
  * @self: The #GoclQueue
  *
- * Returns: (transfer none) (type guint64): The internal 'cl_command_queue'.
+ * Retrieves the internal OpenCL #cl_command_queue object. This is not normally
+ * called by applications. It is rather a low-level, internal API.
+ *
+ * Returns: (transfer none) (type guint64): The internal #cl_command_queue
+ * object
  **/
 cl_command_queue
 gocl_queue_get_queue (GoclQueue *self)
@@ -238,8 +258,11 @@ gocl_queue_get_queue (GoclQueue *self)
 
 /**
  * gocl_queue_get_device:
+ * @self: The #GoclQueue
  *
- * Returns: (transfer none):
+ * Retrieves the device associated with this command queue.
+ *
+ * Returns: (transfer none): The #GoclDevice this queue refers to
  **/
 GoclDevice *
 gocl_queue_get_device (GoclQueue *self)
@@ -253,7 +276,10 @@ gocl_queue_get_device (GoclQueue *self)
  * gocl_queue_get_flags:
  * @self: The #GoclQueue
  *
- * Returns: The flags (properties) of the command queue.
+ * Retrieves the properties of this command queue, as an OR'ed set of values
+ * from #GoclQueueFlags.
+ *
+ * Returns: The flags (properties) of the command queue
  **/
 guint
 gocl_queue_get_flags (GoclQueue *self)
