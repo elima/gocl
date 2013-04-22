@@ -56,6 +56,11 @@ GType                  gocl_kernel_get_type                   (void) G_GNUC_CONS
 
 cl_kernel              gocl_kernel_get_kernel                 (GoclKernel *self);
 
+gboolean               gocl_kernel_set_argument               (GoclKernel      *self,
+                                                               guint            index,
+                                                               gsize            size,
+                                                               const gpointer  *buffer,
+                                                               GError         **error);
 gboolean               gocl_kernel_set_argument_int32         (GoclKernel  *self,
                                                                guint        index,
                                                                gsize        num_elements,

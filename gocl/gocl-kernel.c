@@ -241,6 +241,38 @@ gocl_kernel_get_kernel (GoclKernel *self)
 }
 
 /**
+ * gocl_kernel_set_argument:
+ * @self: The #GoclKernel
+ * @index: The index of this argument in the kernel function
+ * @size: The size of @buffer, in bytes
+ * @buffer: A pointer to an arbitrary block of memory
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Sets the value of the kernel argument at @index, as an arbitrary block of
+ * memory.
+ *
+ * Returns: %TRUE on success, %FALSE on error
+ **/
+gboolean
+gocl_kernel_set_argument (GoclKernel      *self,
+                          guint            index,
+                          gsize            size,
+                          const gpointer  *buffer,
+                          GError         **error)
+{
+  cl_int err_code;
+
+  g_return_val_if_fail (GOCL_IS_KERNEL (self), FALSE);
+
+  err_code = clSetKernelArg (self->priv->kernel,
+                             index,
+                             size,
+                             buffer);
+
+  return ! gocl_error_check_opencl (err_code, error);
+}
+
+/**
  * gocl_kernel_set_argument_int32:
  * @self: The #GoclKernel
  * @index: The index of this argument in the kernel function
@@ -260,16 +292,11 @@ gocl_kernel_set_argument_int32 (GoclKernel  *self,
                                 gint32      *buffer,
                                 GError     **error)
 {
-  cl_int err_code;
-
-  g_return_val_if_fail (GOCL_IS_KERNEL (self), FALSE);
-
-  err_code = clSetKernelArg (self->priv->kernel,
-                             index,
-                             sizeof (gint32) * num_elements,
-                             buffer);
-
-  return ! gocl_error_check_opencl (err_code, error);
+  return gocl_kernel_set_argument (self,
+                                   index,
+                                   sizeof (gint32) * num_elements,
+                                   (const gpointer) buffer,
+                                   error);
 }
 
 /**
