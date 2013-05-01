@@ -1,0 +1,51 @@
+INSTALL
+
+# build
+configure
+Makefile
+*.in
+autom4te.cache/
+compile
+config.h
+config.guess
+*.log
+*.status
+*.sub
+depcomp
+gtk-doc.make
+install-sh
+libtool
+*.sh
+missing
+stamp-h1
+*.m4
+
+# compile
+*.lo
+*.o
+*.la
+.deps/
+.libs/
+
+# generated
+*.pc
+*.gir
+*.typelib
+*-marshal.c
+*-marshal.h
+
+# doc
+*.stamp
+doc/reference/*.types
+doc/reference/html/
+doc/reference/tmpl/
+doc/reference/xml/
+doc/reference/*.txt
+doc/reference/*.args
+doc/reference/*.hierarchy
+doc/reference/*.interfaces
+doc/reference/*.prerequisites
+doc/reference/*.signals
+
+# misc
+vgdump
