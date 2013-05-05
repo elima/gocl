@@ -1,8 +1,8 @@
 /*
- * hello-world.c
+ * hello-world-sync.c
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2013 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -13,15 +13,6 @@
 #define SIZE 1920 * 1080
 #define RUNS 1
 
-static GoclDevice *device;
-static GoclKernel *kernel;
-
-static  gsize local_worksize;
-static  gsize global_worksize;
-
-static GMainLoop *main_loop;
-static gint runs = 0;
-
 /* a simple OpenCL program */
 static const gchar *source =
   ""
@@ -31,58 +22,9 @@ static const gchar *source =
   ""
   "  for (int i=tid * local_work_size; i<tid * local_work_size + local_work_size; i++) {"
   "    if (i < size)"
-  "      data[i] += 1;"
+  "      data[i] = tid;"
   "  }"
   "}";
-
-static void kernel_exec (void);
-
-static void
-kernel_exec_on_complete (GoclEvent *event,
-                         GError    *error,
-                         gpointer   user_data)
-{
-  if (error != NULL)
-    {
-      g_print ("Kernel execution failed: %s\n", error->message);
-      g_error_free (error);
-    }
-  else
-    {
-      g_print ("Kernel execution finished\n");
-    }
-
-  runs++;
-
-  if (runs < RUNS)
-    {
-      kernel_exec ();
-    }
-  else
-    {
-      g_main_loop_quit (main_loop);
-      g_main_loop_unref (main_loop);
-    }
-}
-
-static void
-kernel_exec (void)
-{
-  GoclEvent *event;
-
-  g_print ("Kernel execution starts\n");
-
-  event = gocl_kernel_run_in_device (kernel,
-                                     device,
-                                     global_worksize,
-                                     local_worksize,
-                                     NULL);
-  gocl_event_then (event,
-                   kernel_exec_on_complete,
-                   NULL);
-
-  g_print ("Kernel running\n");
-}
 
 gint
 main (gint argc, gchar *argv[])
@@ -92,9 +34,13 @@ main (gint argc, gchar *argv[])
   gint i;
 
   GoclContext *context;
+  GoclDevice *device;
   GoclBuffer *buffer;
   GoclProgram *prog;
+  GoclKernel *kernel;
 
+  gsize local_worksize;
+  gsize global_worksize;
   guchar *data;
 
   g_type_init ();
@@ -189,19 +135,6 @@ main (gint argc, gchar *argv[])
     }
   g_print ("Buffer created\n");
 
-  /* initialize buffer */
-  if (! gocl_buffer_write_sync (buffer,
-                                gocl_device_get_default_queue (device, NULL),
-                                data,
-                                size,
-                                0,
-                                NULL,
-                                &error))
-    {
-      g_print ("ERROR: Failed to initialize buffer with data: %s\n", error->message);
-      goto out;
-    }
-
   /* set kernel arguments */
   if (! gocl_kernel_set_argument_buffer (kernel,
                                          0,
@@ -222,25 +155,24 @@ main (gint argc, gchar *argv[])
       goto out;
     }
 
-  /* run the kernel asynchronously */
-  GoclEvent *event;
-
   g_print ("Kernel execution starts\n");
 
-  event = gocl_kernel_run_in_device (kernel,
-                                     device,
-                                     global_worksize,
-                                     local_worksize,
-                                     NULL);
-  gocl_event_then (event,
-                   kernel_exec_on_complete,
-                   NULL);
+  /* run the kernel */
+  for (i=0; i<RUNS; i++)
+    {
+      if (! gocl_kernel_run_in_device_sync (kernel,
+                                            device,
+                                            global_worksize,
+                                            local_worksize,
+                                            NULL,
+                                            &error))
+        {
+          g_print ("ERROR: Failed to run kernel: %s\n", error->message);
+          goto out;
+        }
+    }
 
-  g_print ("Kernel running\n");
-
-  /* start the show */
-  main_loop = g_main_loop_new (NULL, FALSE);
-  g_main_loop_run (main_loop);
+  g_print ("Kernel execution finished\n");
 
   /* read back buffer */
   if (! gocl_buffer_read_sync (buffer,
@@ -279,7 +211,7 @@ main (gint argc, gchar *argv[])
     }
   else
     {
-      g_print ("Clean exit :)\n");
+      g_print ("Exit clean :)\n");
     }
 
   return exit_code;

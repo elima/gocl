@@ -6,7 +6,7 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/gocl
 
 if ENABLE_DEBUG
-AM_CFLAGS += -Werror -g3 -O0 -ggdb
+AM_CFLAGS += -Wall -Werror -g3 -O0 -ggdb
 else
 AM_CFLAGS += -DG_DISABLE_ASSERT -DG_DISABLE_CHECKS
 endif
@@ -16,11 +16,17 @@ AM_LIBS = \
 	$(top_srcdir)/gocl/lib@PRJ_API_NAME@.la
 
 noinst_PROGRAMS = \
-	hello-world
+	hello-world \
+	hello-world-sync
 
 # hello-world
 hello_world_CFLAGS = $(AM_CFLAGS)
 hello_world_LDADD = $(AM_LIBS)
 hello_world_SOURCES = hello-world.c
+
+# hello-world-sync
+hello_world_sync_CFLAGS = $(AM_CFLAGS)
+hello_world_sync_LDADD = $(AM_LIBS)
+hello_world_sync_SOURCES = hello-world-sync.c
 
 EXTRA_DIST =
