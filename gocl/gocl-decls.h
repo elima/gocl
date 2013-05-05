@@ -19,6 +19,15 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-decls
+ * @short_description: Global symbols used throughout Gocl API
+ * @stability: Unstable
+ *
+ * Declarations common to Gocl classes. These symbols often map OpenCL symbols
+ * directly.
+ **/
+
 #ifndef __GOCL_DECLS_H__
 #define __GOCL_DECLS_H__
 
@@ -70,6 +79,11 @@ typedef enum
   GOCL_BUFFER_FLAGS_COPY_HOST_PTR  = CL_MEM_COPY_HOST_PTR
 } GoclBufferFlags;
 
+/**
+ * GoclQueueFlags:
+ * @GOCL_QUEUE_FLAGS_OUT_OF_ORDER: Enables out-of-order execution of commands.
+ * @GOCL_QUEUE_FLAGS_PROFILING:    Enables profiling of commands.
+ **/
 typedef enum
 {
   GOCL_QUEUE_FLAGS_OUT_OF_ORDER = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE,
