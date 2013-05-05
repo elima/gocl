@@ -19,6 +19,65 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-event
+ * @short_description: Object that represents the future completion of an
+ * asynchronous operation
+ * @stability: Unstable
+ *
+ * A #GoclEvent is created as the result of requesting an asynchronous
+ * operation on a #GoclQueue (the command queue of a device). Examples
+ * of these operations are the execution of a kernel with
+ * gocl_kernel_run_in_device() and reading from / writing to #GoclBuffer
+ * objects in a non-blocking fashion (not yet implemented).
+ *
+ * A #GoclEvent is used by applications to get a notification when the
+ * corresponding operation completes, by calling gocl_event_then().
+ *
+ * #GoclEvent's are also the building blocks of synchronization
+ * in OpenCL. The application developer will notice that most operations
+ * include a @event_wait_list argument, which asks OpenCL to wait for
+ * the completion of all #GoclEvent's in the list, before starting the
+ * operation in question. This pattern greatly simplifies the application
+ * logic and allows for complex algorithms to be splitted in smaller,
+ * synchronized routines.
+ *
+ * A #GoclEvent is always associated with a #GoclQueue, which represents
+ * the command queue where the operation represented by the event was
+ * originally queued. The #GoclQueue can be retrieved using
+ * gocl_event_get_queue().
+ **/
+
+/**
+ * GoclEventClass:
+ * @parent_class: The parent class, a #GObject
+ *
+ * The class for #GoclEvent objects.
+ **/
+
+/**
+ * GoclEventCallback:
+ * @self: The #GoclEvent
+ * @error: A #GError if an error ocurred, %NULL otherwise
+ * @user_data: The arbitrary pointer passed in gocl_event_then(),
+ * or %NULL
+ *
+ * Prototype of the @callback argument of gocl_event_then().
+ **/
+
+/**
+ * GoclEventResolverFunc:
+ * @self: The #GoclEvent
+ * @error: A #GError if an error ocurred, %NULL otherwise
+ *
+ * Prototype of the function that notifies the completion of an event.
+ * This function is not normally called directly by applications. The object
+ * that creates the event is responsible for stealing the resolver function
+ * with gocl_event_steal_resolver_func(), and then resolve the event with
+ * success or error by calling this method, when the related operation
+ * completes.
+ **/
+
 #include <string.h>
 
 #include "gocl-event.h"
@@ -101,7 +160,7 @@ gocl_event_class_init (GoclEventClass *class)
   g_object_class_install_property (obj_class, PROP_EVENT,
                                    g_param_spec_pointer ("event",
                                                          "Event",
-                                                         "The native event object",
+                                                         "The internal OpenCL cl_event object",
                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
                                                          G_PARAM_STATIC_STRINGS));
   g_object_class_install_property (obj_class, PROP_QUEUE,
@@ -355,8 +414,12 @@ unref_in_idle (gpointer user_data)
 
 /**
  * gocl_event_get_event:
+ * @self: The #GoclEvent
  *
- * Returns: (transfer none) (type guint64):
+ * Retrieves the OpenCL internal #cl_event object. This is a rather
+ * low-level method that should not normally be called by applications.
+ *
+ * Returns: (transfer none) (type guint64): The internal #cl_event object
  **/
 cl_event
 gocl_event_get_event (GoclEvent *self)
@@ -368,8 +431,12 @@ gocl_event_get_event (GoclEvent *self)
 
 /**
  * gocl_event_get_queue:
+ * @self: The #GoclEvent
  *
- * Returns: (transfer none):
+ * Retrieves the #GoclQueue object where the operation that created this
+ * event was queued.
+ *
+ * Returns: (transfer none): The #GoclQueue associated with the event
  **/
 GoclQueue *
 gocl_event_get_queue (GoclEvent *self)
@@ -381,8 +448,17 @@ gocl_event_get_queue (GoclEvent *self)
 
 /**
  * gocl_event_steal_resolver_func: (skip)
+ * @self: The #GoclEvent
  *
- * Returns:
+ * Steals the internal resolver function from this event and sets it to %NULL,
+ * so that only the first caller is able to resolve this event. This is a rather
+ * low-level method that should not normally be called by applications.
+ *
+ * This method is intended to secure the #GoclEvent, to guarantee that the
+ * creator of the event has exclusive control over the triggering of the
+ * event.
+ *
+ * Returns: (transfer none): The internal resolver function
  **/
 GoclEventResolverFunc
 gocl_event_steal_resolver_func (GoclEvent *self)
@@ -399,8 +475,16 @@ gocl_event_steal_resolver_func (GoclEvent *self)
 
 /**
  * gocl_event_then:
- * @callback: (scope async):
+ * @self: The #GoclEvent
+ * @callback: (scope async): A callback with a #GoclEventCallback signature
+ * @user_data: (allow-none): Arbitrary data to pass in @callback, or %NULL
  *
+ * Requests for a notification when the operation represented by this event
+ * has finished. When this event triggers, @callback will be called
+ * passing @user_data as argument, if provided.
+ *
+ * If the event already triggered when this method is called, the notification
+ * is immediately scheduled as an idle call.
  **/
 void
 gocl_event_then (GoclEvent         *self,
@@ -445,10 +529,17 @@ gocl_event_then (GoclEvent         *self,
 
 /**
  * gocl_event_list_to_array:
- * @event_list: (element-type Gocl.Event) (allow-none):
- * @len: (out) (allow-none):
+ * @event_list: (element-type Gocl.Event) (allow-none): A #GList containing
+ * #GoclEvent objects
+ * @len: (out) (allow-none): A pointer to a value to retrieve list length
  *
- * Returns: (transfer full) (array length=len):
+ * A convenient method to retrieve a #GList of #GoclEvent's as an array of
+ * #cl_event's corresponding to the internal objects of each #GoclEvent in
+ * the #GList. This is a rather low-level method and should not normally be
+ * called by applications.
+ *
+ * Returns: (transfer container) (array length=len): An array of #cl_event
+ *   objects. Free with g_free().
  **/
 cl_event *
 gocl_event_list_to_array (GList *event_list, gsize *len)
@@ -483,6 +574,14 @@ gocl_event_list_to_array (GList *event_list, gsize *len)
   return event_arr;
 }
 
+/**
+ * gocl_event_idle_unref:
+ * @self: The #GoclEvent
+ *
+ * Schedules an object de-reference in an idle call.
+ * This is a rather low-level method and should not normally be called by
+ * applications.
+ **/
 void
 gocl_event_idle_unref (GoclEvent *self)
 {
