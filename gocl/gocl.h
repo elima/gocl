@@ -22,6 +22,7 @@
 #ifndef __GOCL_H__
 #define __GOCL_H__
 
+#include <gocl-decls.h>
 #include <gocl-context.h>
 #include <gocl-device.h>
 #include <gocl-buffer.h>
