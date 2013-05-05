@@ -43,6 +43,13 @@
  * execution. Asynchronous function will shortly be provided as well.
  **/
 
+/**
+ * GoclBufferClass:
+ * @parent_class: The parent class
+ *
+ * The class for #GoclBuffer objects.
+ **/
+
 #include <string.h>
 #include <gio/gio.h>
 

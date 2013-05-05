@@ -41,6 +41,13 @@
  * gocl_program_get_kernel() method.
  **/
 
+/**
+ * GoclProgramClass:
+ * @parent_class: The parent class
+ *
+ * The class for #GoclProgram objects.
+ **/
+
 #include <string.h>
 
 #include "gocl-program.h"

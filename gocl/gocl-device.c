@@ -36,6 +36,13 @@
  * be created by passing this object as 'device' property in the #GoclQueue constructor.
  **/
 
+/**
+ * GoclDeviceClass:
+ * @parent_class: The parent class
+ *
+ * The class for #GoclDevice objects.
+ **/
+
 #include <gio/gio.h>
 
 #include "gocl-device.h"

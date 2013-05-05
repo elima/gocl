@@ -43,6 +43,13 @@
  * gocl_context_create_buffer() method is provided.
  **/
 
+/**
+ * GoclContextClass:
+ * @parent_class: The parent class
+ *
+ * The class for #GoclContext objects.
+ **/
+
 #include <string.h>
 #include <gio/gio.h>
 

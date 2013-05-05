@@ -35,6 +35,13 @@
  * internally enqueues read/write operations on the command queue.
  **/
 
+/**
+ * GoclQueueClass:
+ * @parent_class: The parent class
+ *
+ * The class for #GoclQueue objects.
+ **/
+
 #include <gio/gio.h>
 
 #include "gocl-queue.h"

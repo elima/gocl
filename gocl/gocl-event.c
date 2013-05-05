@@ -50,7 +50,7 @@
 
 /**
  * GoclEventClass:
- * @parent_class: The parent class, a #GObject
+ * @parent_class: The parent class
  *
  * The class for #GoclEvent objects.
  **/

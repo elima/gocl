@@ -46,6 +46,13 @@
  * as well.
  **/
 
+/**
+ * GoclKernelClass:
+ * @parent_class: The parent class
+ *
+ * The class for #GoclKernel objects.
+ **/
+
 #include <string.h>
 #include <gio/gio.h>
 
