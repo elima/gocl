@@ -19,6 +19,15 @@
  * for more details.
  */
 
+/**
+ * SECTION:gocl-error
+ * @short_description: API related to error management
+ * @stability: Unstable
+ *
+ * Internal functions related to error management. This API is private, not
+ * supposed to be used in applications.
+ **/
+
 #include "gocl-error.h"
 
 static const gchar *
