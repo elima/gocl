@@ -46,6 +46,7 @@ doc/reference/*.hierarchy
 doc/reference/*.interfaces
 doc/reference/*.prerequisites
 doc/reference/*.signals
+*.bak
 
 # misc
 vgdump
