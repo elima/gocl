@@ -72,8 +72,6 @@ struct _GoclContextPrivate
 
   cl_device_id devices[MAX_DEVICES];
   cl_uint num_devices;
-
-  cl_command_queue queues[MAX_DEVICES];
 };
 
 static cl_platform_id gocl_platforms[MAX_PLATFORMS];
@@ -194,19 +192,12 @@ gocl_context_init (GoclContext *self)
   GoclContextPrivate *priv;
 
   self->priv = priv = GOCL_CONTEXT_GET_PRIVATE (self);
-
-  memset (priv->queues, 0, sizeof (cl_command_queue) * MAX_DEVICES);
 }
 
 static void
 gocl_context_finalize (GObject *obj)
 {
   GoclContext *self = GOCL_CONTEXT (obj);
-  gint i;
-
-  for (i=0; i<self->priv->num_devices; i++)
-    if (self->priv->queues[i] != NULL)
-      clReleaseCommandQueue (self->priv->queues[i]);
 
   clReleaseContext (self->priv->context);
 
