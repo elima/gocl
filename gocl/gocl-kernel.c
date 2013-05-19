@@ -392,7 +392,6 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
                                      g_list_length (event_wait_list),
                                      _event_wait_list,
                                      &event);
-
   g_free (_event_wait_list);
 
   if (gocl_error_check_opencl (err_code, error))
@@ -424,41 +423,34 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
  * finishes
  **/
 GoclEvent *
-gocl_kernel_run_in_device (GoclKernel  *self,
-                           GoclDevice  *device,
-                           gsize        global_work_size,
-                           gsize        local_work_size,
-                           GList       *event_wait_list)
+gocl_kernel_run_in_device (GoclKernel *self,
+                           GoclDevice *device,
+                           gsize       global_work_size,
+                           gsize       local_work_size,
+                           GList      *event_wait_list)
 {
   GError *error = NULL;
 
   cl_int err_code;
   cl_event event;
-  GoclQueue *queue;
+  GoclQueue *queue = NULL;
   cl_command_queue _queue;
 
   GoclEvent *_event = NULL;
   GoclEventResolverFunc resolver_func;
 
   cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
 
   g_return_val_if_fail (GOCL_IS_KERNEL (self), FALSE);
   g_return_val_if_fail (GOCL_IS_DEVICE (device), FALSE);
 
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+
   queue = gocl_device_get_default_queue (device, &error);
-
-  _event = g_object_new (GOCL_TYPE_EVENT,
-                         "queue", queue,
-                         NULL);
-  resolver_func = gocl_event_steal_resolver_func (_event);
-
   if (queue == NULL)
-    {
-      resolver_func (_event, error);
-      goto out;
-    }
-
-  _event_wait_list = gocl_event_list_to_array (event_wait_list, NULL);
+    goto out;
 
   _queue = gocl_queue_get_queue (queue);
 
@@ -468,19 +460,13 @@ gocl_kernel_run_in_device (GoclKernel  *self,
                                      NULL,
                                      &global_work_size,
                                      &local_work_size,
-                                     g_list_length (event_wait_list),
+                                     event_wait_list_len,
                                      _event_wait_list,
                                      &event);
   g_free (_event_wait_list);
 
-  if (gocl_error_check_opencl (err_code, &error))
+  if (! gocl_error_check_opencl (err_code, &error))
     {
-      resolver_func = gocl_event_steal_resolver_func (_event);
-      goto out;
-    }
-  else
-    {
-      g_object_unref (_event);
       _event = g_object_new (GOCL_TYPE_EVENT,
                              "queue", queue,
                              "event", event,
@@ -489,6 +475,16 @@ gocl_kernel_run_in_device (GoclKernel  *self,
     }
 
  out:
+  if (error != NULL)
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             NULL);
+      resolver_func = gocl_event_steal_resolver_func (_event);
+      resolver_func (_event, error);
+      g_error_free (error);
+    }
+
   gocl_event_idle_unref (_event);
 
   return _event;
