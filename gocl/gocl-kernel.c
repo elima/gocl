@@ -471,6 +471,7 @@ gocl_kernel_run_in_device (GoclKernel *self,
                              "queue", queue,
                              "event", event,
                              NULL);
+      gocl_event_set_event_wait_list (_event, event_wait_list);
       gocl_event_steal_resolver_func (_event);
     }
 
