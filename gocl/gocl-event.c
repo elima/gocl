@@ -542,11 +542,11 @@ gocl_event_then (GoclEvent         *self,
  *   objects. Free with g_free().
  **/
 cl_event *
-gocl_event_list_to_array (GList *event_list, gsize *len)
+gocl_event_list_to_array (GList *event_list, guint *len)
 {
   cl_event *event_arr = NULL;
   gint i;
-  gsize _len;
+  guint _len;
   GList *node;
 
   _len = g_list_length (event_list);

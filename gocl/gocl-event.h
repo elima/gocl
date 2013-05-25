@@ -73,7 +73,7 @@ void                   gocl_event_then                       (GoclEvent         
 /* these methods should eventually be moved to a private header file,
    since they are not supposed to be called by applications */
 cl_event *             gocl_event_list_to_array              (GList *event_list,
-                                                              gsize *len);
+                                                              guint *len);
 
 void                   gocl_event_idle_unref                 (GoclEvent *self);
 
