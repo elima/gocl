@@ -64,7 +64,7 @@ GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self
                                                                GError     **error);
 
 /* GoclQueue headers */
-GoclDevice *           gocl_queue_get_device                 (GoclQueue *self);
+GoclDevice *           gocl_queue_get_device                  (GoclQueue *self);
 
 G_END_DECLS
 
