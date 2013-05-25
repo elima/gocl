@@ -27,6 +27,7 @@
 
 #include <gocl-decls.h>
 #include <gocl-queue.h>
+#include <gocl-event.h>
 
 G_BEGIN_DECLS
 
@@ -57,6 +58,12 @@ GType                  gocl_buffer_get_type                   (void) G_GNUC_CONS
 
 cl_mem                 gocl_buffer_get_buffer                 (GoclBuffer *self);
 
+GoclEvent *            gocl_buffer_read                       (GoclBuffer *self,
+                                                               GoclQueue  *queue,
+                                                               gpointer    target_ptr,
+                                                               gsize       size,
+                                                               goffset     offset,
+                                                               GList      *event_wait_list);
 gboolean               gocl_buffer_read_sync                  (GoclBuffer  *self,
                                                                GoclQueue   *queue,
                                                                gpointer     target_ptr,

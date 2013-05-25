@@ -58,7 +58,6 @@
 #include "gocl-error.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
-#include "gocl-event.h"
 
 struct _GoclBufferPrivate
 {
@@ -283,6 +282,93 @@ gocl_buffer_get_context (GoclBuffer *buffer)
   g_return_val_if_fail (GOCL_IS_BUFFER (buffer), NULL);
 
   return buffer->priv->context;
+}
+
+/**
+ * gocl_buffer_read:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @target_ptr: (array length=size) (element-type guint8): The pointer to copy
+ * the data to
+ * @size: The size of the data to be read
+ * @offset: The offset to start reading from
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ *
+ * Asynchronously reads a block of data of @size bytes from remote context
+ * into host memory, starting at @offset. The operation is enqueued in
+ * @queue, and the program execution continues without blocking. For a
+ * synchronous version of this methid, see gocl_buffer_read_sync().
+ *
+ * A #GoclEvent is returned so that the application can get notified when the
+ * operation finishes, by calling gocl_event_then(). Also, the returned event
+ * can be added to the @event_wait_list argument of other operations, to
+ * synchronize their execution with the completion of this operation.
+ *
+ * If @event_wait_list is provided, the read operation will start only when
+ * all the #GoclEvent in the list have triggered.
+ *
+ * Returns: (transfer none): A #GoclEvent to get notified when the read
+ * operation finishes
+ **/
+GoclEvent *
+gocl_buffer_read (GoclBuffer *self,
+                  GoclQueue  *queue,
+                  gpointer    target_ptr,
+                  gsize       size,
+                  goffset     offset,
+                  GList      *event_wait_list)
+{
+  GError *error = NULL;
+  cl_int err_code;
+  cl_event event;
+  cl_command_queue _queue;
+
+  GoclEvent *_event = NULL;
+  GoclEventResolverFunc resolver_func;
+
+  cl_event *_event_wait_list = NULL;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), NULL);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), NULL);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list, NULL);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  err_code = clEnqueueReadBuffer (_queue,
+                                  self->priv->buf,
+                                  CL_FALSE,
+                                  offset,
+                                  size,
+                                  target_ptr,
+                                  g_list_length (event_wait_list),
+                                  _event_wait_list,
+                                  &event);
+  g_free (_event_wait_list);
+
+  if (gocl_error_check_opencl (err_code, &error))
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             NULL);
+      resolver_func = gocl_event_steal_resolver_func (_event);
+      resolver_func (_event, error);
+      g_error_free (error);
+    }
+  else
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             "event", event,
+                             NULL);
+      gocl_event_set_event_wait_list (_event, event_wait_list);
+      gocl_event_steal_resolver_func (_event);
+    }
+
+  gocl_event_idle_unref (_event);
+
+  return _event;
 }
 
 /**
