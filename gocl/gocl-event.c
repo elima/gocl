@@ -100,6 +100,8 @@ struct _GoclEventPrivate
 
   gint complete_src_id;
   gint unref_src_id;
+
+  GList *event_wait_list;
 };
 
 typedef struct
@@ -194,6 +196,8 @@ gocl_event_init (GoclEvent *self)
 
   priv->complete_src_id = 0;
   priv->unref_src_id = 0;
+
+  priv->event_wait_list = NULL;
 }
 
 static void
@@ -205,6 +209,12 @@ gocl_event_dispose (GObject *obj)
     {
       g_object_unref (self->priv->queue);
       self->priv->queue = NULL;
+    }
+
+  if (self->priv->event_wait_list != NULL)
+    {
+      g_list_free_full (self->priv->event_wait_list, g_object_unref);
+      self->priv->event_wait_list = NULL;
     }
 
   G_OBJECT_CLASS (gocl_event_parent_class)->dispose (obj);
@@ -525,6 +535,42 @@ gocl_event_then (GoclEvent         *self,
                                          wait_event_thread_func,
                                          self);
     }
+}
+
+/**
+ * gocl_event_set_event_wait_list:
+ * @self: The #GoclEvent
+ * @event_list: (element-type Gocl.Event) (allow-none): List of #GoclEvent
+ * events that this event should wait for, or %NULL
+ *
+ * Stores a copy of the given #GList of #GoclEvent's to take ownership over the
+ * list and guarantee that the events will remain alive until this event is
+ * destroyed.
+ *
+ * This is a rather low-level method and should not normally be called by
+ * applications.
+ **/
+void
+gocl_event_set_event_wait_list (GoclEvent *self, GList *event_list)
+{
+  GList *new_list = NULL;
+
+  g_return_if_fail (GOCL_IS_EVENT (self));
+
+  if (self->priv->event_wait_list != NULL)
+    g_list_free_full (self->priv->event_wait_list, g_object_unref);
+
+  while (event_list != NULL)
+    {
+      g_return_if_fail (GOCL_IS_EVENT (event_list->data));
+
+      new_list = g_list_prepend (new_list,
+                                 g_object_ref (G_OBJECT (event_list->data)));
+
+      event_list = event_list->next;
+    }
+
+  self->priv->event_wait_list = new_list;
 }
 
 /**

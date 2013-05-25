@@ -72,6 +72,8 @@ void                   gocl_event_then                       (GoclEvent         
 
 /* these methods should eventually be moved to a private header file,
    since they are not supposed to be called by applications */
+void                   gocl_event_set_event_wait_list        (GoclEvent *self,
+                                                              GList     *event_list);
 cl_event *             gocl_event_list_to_array              (GList *event_list,
                                                               guint *len);
 
