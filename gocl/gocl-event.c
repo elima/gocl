@@ -522,18 +522,18 @@ gocl_event_then (GoclEvent         *self,
                    notify_event_completed_in_caller_context,
                    closure);
     }
-  else if (! self->priv->waiting_event)
+  else
     {
-      g_assert (self->priv->event != NULL);
-
-      self->priv->waiting_event = TRUE;
-
       self->priv->closure_list = g_list_append (self->priv->closure_list,
                                                 closure);
 
-      self->priv->thread = g_thread_new ("gocl-event-thread",
-                                         wait_event_thread_func,
-                                         self);
+      if (self->priv->event != NULL && ! self->priv->waiting_event)
+        {
+          self->priv->waiting_event = TRUE;
+          self->priv->thread = g_thread_new ("gocl-event-thread",
+                                             wait_event_thread_func,
+                                             self);
+        }
     }
 }
 
