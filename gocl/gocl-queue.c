@@ -49,7 +49,6 @@
 #include "gocl-error.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
-#include "gocl-device.h"
 
 struct _GoclQueuePrivate
 {
