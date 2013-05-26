@@ -83,6 +83,8 @@
 #include "gocl-event.h"
 
 #include "gocl-error.h"
+#include "gocl-device.h"
+#include "gocl-context.h"
 
 struct _GoclEventPrivate
 {
@@ -92,6 +94,8 @@ struct _GoclEventPrivate
   GError *error;
   GoclEventResolverFunc resolver_func;
 
+  GMainContext *context;
+  GMutex mutex;
   gboolean already_resolved;
   gboolean waiting_event;
 
@@ -100,6 +104,8 @@ struct _GoclEventPrivate
 
   gint complete_src_id;
   gint unref_src_id;
+
+  gboolean is_user_event;
 
   GList *event_wait_list;
 };
@@ -124,6 +130,7 @@ static void           gocl_event_class_init            (GoclEventClass *class);
 static void           gocl_event_init                  (GoclEvent *self);
 static void           gocl_event_dispose               (GObject *obj);
 static void           gocl_event_finalize              (GObject *obj);
+static void           gocl_event_constructed           (GObject *obj);
 
 static void           set_property                     (GObject      *obj,
                                                         guint         prop_id,
@@ -139,8 +146,15 @@ static void           free_closure                     (gpointer user_data);
 static void           gocl_event_resolve               (GoclEvent *self,
                                                         GError    *error);
 
-static gpointer       wait_event_thread_func           (gpointer user_data);
+static guint          timeout_add                      (GMainContext *context,
+                                                        guint         timeout,
+                                                        gint          priority,
+                                                        GSourceFunc   callback,
+                                                        gpointer      user_data);
 
+static void           event_on_notify                  (cl_event event,
+                                                        cl_int   event_command_exec_status,
+                                                        gpointer user_data);
 
 G_DEFINE_TYPE (GoclEvent, gocl_event, G_TYPE_OBJECT);
 
@@ -158,6 +172,7 @@ gocl_event_class_init (GoclEventClass *class)
   obj_class->finalize = gocl_event_finalize;
   obj_class->get_property = get_property;
   obj_class->set_property = set_property;
+  obj_class->constructed = gocl_event_constructed;
 
   g_object_class_install_property (obj_class, PROP_EVENT,
                                    g_param_spec_pointer ("event",
@@ -188,6 +203,8 @@ gocl_event_init (GoclEvent *self)
   priv->error = NULL;
   priv->resolver_func = gocl_event_resolve;
 
+  priv->context = g_main_context_get_thread_default ();
+  g_mutex_init (&priv->mutex);
   priv->already_resolved = FALSE;
   priv->waiting_event = FALSE;
 
@@ -196,6 +213,8 @@ gocl_event_init (GoclEvent *self)
 
   priv->complete_src_id = 0;
   priv->unref_src_id = 0;
+
+  priv->is_user_event = TRUE;
 
   priv->event_wait_list = NULL;
 }
@@ -240,7 +259,55 @@ gocl_event_finalize (GObject *obj)
       g_list_free_full (self->priv->closure_list, free_closure);
     }
 
+  g_mutex_clear (&self->priv->mutex);
+
+  if (self->priv->complete_src_id != 0)
+    {
+      g_source_remove (self->priv->complete_src_id);
+      self->priv->complete_src_id = 0;
+    }
+
   G_OBJECT_CLASS (gocl_event_parent_class)->finalize (obj);
+}
+
+static void
+gocl_event_constructed (GObject *obj)
+{
+  GoclEvent *self = GOCL_EVENT (obj);
+  cl_int err_code;
+  GError *error = NULL;
+
+  if (self->priv->event == NULL)
+    {
+      GoclDevice *device;
+      GoclContext *context;
+      cl_context _context;
+
+      device = gocl_queue_get_device (self->priv->queue);
+      context = gocl_device_get_context (device);
+      _context = gocl_context_get_context (context);
+
+      self->priv->event = clCreateUserEvent (_context, &err_code);
+      if (gocl_error_check_opencl (err_code, &error))
+        {
+          g_warning ("Error creating user event: %s\n", error->message);
+          g_error_free (error);
+        }
+      else
+        {
+          self->priv->is_user_event = TRUE;
+        }
+    }
+
+  err_code = clSetEventCallback (self->priv->event,
+                                 CL_COMPLETE,
+                                 event_on_notify,
+                                 self);
+  if (gocl_error_check_opencl (err_code, &error))
+    {
+      g_warning ("Error setting event callback: %s\n", error->message);
+      g_error_free (error);
+    }
 }
 
 static void
@@ -249,9 +316,7 @@ set_property (GObject      *obj,
               const GValue *value,
               GParamSpec   *pspec)
 {
-  GoclEvent *self;
-
-  self = GOCL_EVENT (obj);
+  GoclEvent *self = GOCL_EVENT (obj);
 
   switch (prop_id)
     {
@@ -275,9 +340,7 @@ get_property (GObject    *obj,
               GValue     *value,
               GParamSpec *pspec)
 {
-  GoclEvent *self;
-
-  self = GOCL_EVENT (obj);
+  GoclEvent *self = GOCL_EVENT (obj);
 
   switch (prop_id)
     {
@@ -295,7 +358,7 @@ get_property (GObject    *obj,
     }
 }
 
-guint
+static guint
 timeout_add (GMainContext *context,
              guint         timeout,
              gint          priority,
@@ -335,18 +398,6 @@ free_closure (gpointer user_data)
   g_slice_free (Closure, closure);
 }
 
-static void
-gocl_event_resolve (GoclEvent *self, GError *error)
-{
-  g_return_if_fail (GOCL_IS_EVENT (self));
-  g_return_if_fail (! self->priv->already_resolved);
-
-  self->priv->already_resolved = TRUE;
-
-  if (error != NULL)
-    self->priv->error = g_error_copy (error);
-}
-
 static gboolean
 notify_event_completed_in_caller_context (gpointer user_data)
 {
@@ -359,8 +410,6 @@ notify_event_completed_in_caller_context (gpointer user_data)
 
   free_closure (closure);
 
-  g_object_unref (self);
-
   return FALSE;
 }
 
@@ -368,6 +417,8 @@ static gboolean
 event_completed (gpointer user_data)
 {
   GoclEvent *self = GOCL_EVENT (user_data);
+
+  g_mutex_lock (&self->priv->mutex);
 
   self->priv->complete_src_id = 0;
 
@@ -391,21 +442,81 @@ event_completed (gpointer user_data)
   g_list_free (self->priv->closure_list);
   self->priv->closure_list = NULL;
 
+  if (self->priv->event_wait_list != NULL)
+    {
+      g_list_free_full (self->priv->event_wait_list, g_object_unref);
+      self->priv->event_wait_list = NULL;
+    }
+
+  g_mutex_unlock (&self->priv->mutex);
+
   return FALSE;
 }
 
+static void
+event_on_notify (cl_event event,
+                 cl_int   event_command_exec_status,
+                 gpointer user_data)
+{
+  GoclEvent *self = GOCL_EVENT (user_data);
+  GError *error = NULL;
+
+  g_mutex_lock (&self->priv->mutex);
+
+  if (gocl_error_check_opencl (event_command_exec_status, &error))
+    self->priv->error = error;
+
+  self->priv->complete_src_id = timeout_add (self->priv->context,
+                                             0,
+                                             G_PRIORITY_DEFAULT,
+                                             event_completed,
+                                             self);
+  g_mutex_unlock (&self->priv->mutex);
+}
+
+static void
+gocl_event_resolve (GoclEvent *self, GError *error)
+{
+  g_return_if_fail (GOCL_IS_EVENT (self));
+  g_return_if_fail (! self->priv->already_resolved);
+
+  g_mutex_lock (&self->priv->mutex);
+
+  if (error != NULL)
+    self->priv->error = g_error_copy (error);
+
+  self->priv->complete_src_id = timeout_add (self->priv->context,
+                                             0,
+                                             G_PRIORITY_DEFAULT,
+                                             event_completed,
+                                             self);
+
+  g_mutex_unlock (&self->priv->mutex);
+
+  if (self->priv->is_user_event)
+    {
+      cl_int err_code;
+      GError *cl_error = NULL;
+
+      err_code = clSetUserEventStatus (self->priv->event, CL_COMPLETE);
+      if (gocl_error_check_opencl (err_code, &cl_error))
+        {
+          g_warning ("Error resolving OpenCL user event: %s\n", error->message);
+          g_error_free (error);
+        }
+    }
+}
+
+/* calling clWaitForEvents from a thread is oddly necessary because otherwise
+   the event callback doesn't trigger in AMD APP SDK platform */
 static gpointer
 wait_event_thread_func (gpointer user_data)
 {
   GoclEvent *self = GOCL_EVENT (user_data);
 
-  clWaitForEvents (1, &self->priv->event);
+  g_assert (self->priv->event != NULL);
 
-  timeout_add (NULL,
-               0,
-               G_PRIORITY_DEFAULT,
-               event_completed,
-               self);
+  clWaitForEvents (1, &self->priv->event);
 
   return NULL;
 }
@@ -512,7 +623,7 @@ gocl_event_then (GoclEvent         *self,
   closure->context = g_main_context_get_thread_default ();
   closure->self = g_object_ref (self);
 
-  g_object_ref (self);
+  g_mutex_lock (&self->priv->mutex);
 
   if (self->priv->already_resolved)
     {
@@ -535,6 +646,8 @@ gocl_event_then (GoclEvent         *self,
                                              self);
         }
     }
+
+  g_mutex_unlock (&self->priv->mutex);
 }
 
 /**
