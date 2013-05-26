@@ -311,6 +311,16 @@ gocl_device_get_default_queue (GoclDevice *self, GError **error)
   return self->priv->queue;
 }
 
+/**
+ * gocl_device_has_extension:
+ * @self: The #GoclDevice
+ * @extension_name: The OpenCL extension name, as string
+ *
+ * Tells whether the device supports a given OpenCL extension, described by
+ * @extension_name.
+ *
+ * Returns: %TRUE if the device supports the extension, %FALSE otherwise
+ **/
 gboolean
 gocl_device_has_extension (GoclDevice *self, const gchar *extension_name)
 {
