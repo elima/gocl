@@ -71,6 +71,12 @@ gboolean               gocl_buffer_read_sync                  (GoclBuffer  *self
                                                                goffset      offset,
                                                                GList       *event_wait_list,
                                                                GError     **error);
+GoclEvent *            gocl_buffer_write                      (GoclBuffer     *self,
+                                                               GoclQueue      *queue,
+                                                               const gpointer  data,
+                                                               gsize           size,
+                                                               goffset         offset,
+                                                               GList          *event_wait_list);
 gboolean               gocl_buffer_write_sync                 (GoclBuffer      *self,
                                                                GoclQueue       *queue,
                                                                const gpointer   data,
