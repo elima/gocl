@@ -59,6 +59,8 @@ struct _GoclDevicePrivate
   gsize max_work_group_size;
 
   GoclQueue *queue;
+
+  gchar *extensions;
 };
 
 /* properties */
@@ -72,6 +74,7 @@ enum
 static void           gocl_device_class_init            (GoclDeviceClass *class);
 static void           gocl_device_init                  (GoclDevice *self);
 static void           gocl_device_dispose               (GObject *obj);
+static void           gocl_device_finalize              (GObject *obj);
 
 static void           set_property                      (GObject      *obj,
                                                          guint         prop_id,
@@ -95,6 +98,7 @@ gocl_device_class_init (GoclDeviceClass *class)
   GObjectClass *obj_class = G_OBJECT_CLASS (class);
 
   obj_class->dispose = gocl_device_dispose;
+  obj_class->finalize = gocl_device_finalize;
   obj_class->get_property = get_property;
   obj_class->set_property = set_property;
 
@@ -125,6 +129,8 @@ gocl_device_init (GoclDevice *self)
 
   priv->max_work_group_size = 0;
   priv->queue = NULL;
+
+  priv->extensions = NULL;
 }
 
 static void
@@ -145,6 +151,16 @@ gocl_device_dispose (GObject *obj)
     }
 
   G_OBJECT_CLASS (gocl_device_parent_class)->dispose (obj);
+}
+
+static void
+gocl_device_finalize (GObject *obj)
+{
+  GoclDevice *self = GOCL_DEVICE (obj);
+
+  g_free (self->priv->extensions);
+
+  G_OBJECT_CLASS (gocl_device_parent_class)->finalize (obj);
 }
 
 static void
@@ -293,4 +309,38 @@ gocl_device_get_default_queue (GoclDevice *self, GError **error)
     }
 
   return self->priv->queue;
+}
+
+gboolean
+gocl_device_has_extension (GoclDevice *self, const gchar *extension_name)
+{
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
+  g_return_val_if_fail (extension_name != NULL, FALSE);
+
+  if (self->priv->extensions == NULL)
+    {
+      cl_int err_code;
+      gchar value[2049] = {0, };
+      gsize value_size;
+      GError *error = NULL;
+
+      err_code = clGetDeviceInfo (self->priv->device_id,
+                                  CL_DEVICE_EXTENSIONS,
+                                  2048,
+                                  value,
+                                  &value_size);
+      if (gocl_error_check_opencl (err_code, &error))
+        {
+          g_warning ("Error getting device info for CL_DEVICE_EXTENSIONS: %s",
+                     error->message);
+          g_error_free (error);
+          return FALSE;
+        }
+
+      value[value_size] = '\0';
+      self->priv->extensions = g_strdup (value);
+    }
+
+  return
+    g_strstr_len (self->priv->extensions, -1, extension_name) != NULL;
 }

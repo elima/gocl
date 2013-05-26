@@ -63,6 +63,9 @@ gsize                  gocl_device_get_max_work_group_size    (GoclDevice  *self
 GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self,
                                                                GError     **error);
 
+gboolean               gocl_device_has_extension              (GoclDevice   *self,
+                                                               const gchar  *extension_name);
+
 /* GoclQueue headers */
 GoclDevice *           gocl_queue_get_device                  (GoclQueue *self);
 
