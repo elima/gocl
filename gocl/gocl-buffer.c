@@ -35,12 +35,13 @@
  * Also, buffers can be initialized at any time by calling
  * gocl_buffer_write_sync().
  *
- * To read data from a buffer into host memory, gocl_buffer_read_sync() method
- * is provided. This is normally used after the execution of a kernel that
- * affected the contents of the buffer.
+ * To read data from a buffer into host memory, gocl_buffer_read() and
+ * gocl_buffer_read_sync() methods are provided. These are normally used after
+ * the execution of a kernel that affected the contents of the buffer.
  *
- * Both gocl_buffer_write_sync() and gocl_buffer_read_sync() are block program
- * execution. Asynchronous function will shortly be provided as well.
+ * Both gocl_buffer_write_sync() and gocl_buffer_read_sync() block program
+ * execution, while gocl_buffer_write() and gocl_buffer_read() are asynchronous
+ * versions and safe to call from the application's main loop.
  **/
 
 /**
