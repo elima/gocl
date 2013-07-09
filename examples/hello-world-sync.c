@@ -10,19 +10,27 @@
 
 #include <gocl.h>
 
-#define SIZE 1920 * 1080
+#define WIDTH  32
+#define HEIGHT 32
+
 #define RUNS 1
 
 /* a simple OpenCL program */
 static const gchar *source =
   ""
   "__kernel void my_kernel (__global char *data, const int size) {"
-  "  int tid = get_global_id (0);"
-  "  int local_work_size = get_local_size (0);"
   ""
-  "  for (int i=tid * local_work_size; i<tid * local_work_size + local_work_size; i++) {"
-  "    if (i < size)"
-  "      data[i] = tid;"
+  "  int2 lid = {get_local_id (0), get_local_id(1)};"
+  "  int2 global_work_size = {get_global_size(0), get_global_size(1)};"
+  "  int2 local_work_size = global_work_size / (int2) {get_local_size(0), get_local_size(1)};"
+  ""
+  "  for (int i = 0; i < local_work_size[0]; i++) {"
+  "    for (int j = 0; j < local_work_size[1]; j++) {"
+  "      int x = i + lid[0]*local_work_size[0];"
+  "      int y = j + lid[1]*local_work_size[1];"
+  "      if (x < get_global_size(0) && y < get_global_size(1))"
+  "        data[y * get_global_size(0) + x] = (lid[1] << 4) + lid[0];"
+  "    }"
   "  }"
   "}";
 
@@ -31,7 +39,7 @@ main (gint argc, gchar *argv[])
 {
   gint exit_code = 0;
   GError *error = NULL;
-  gint i;
+  gint i, j;
 
   GoclContext *context;
   GoclDevice *device;
@@ -39,9 +47,8 @@ main (gint argc, gchar *argv[])
   GoclProgram *prog;
   GoclKernel *kernel;
 
-  gsize local_worksize;
-  gsize global_worksize;
   guchar *data;
+  gsize data_size = 0;
 
 #ifndef GLIB_VERSION_2_36
   g_type_init ();
@@ -103,7 +110,7 @@ main (gint argc, gchar *argv[])
 
   /* get work sizes */
   gsize max_workgroup_size;
-  gint32 size = SIZE;
+  gint32 size = WIDTH * HEIGHT;
 
   max_workgroup_size = gocl_device_get_max_work_group_size (device, &error);
   if (max_workgroup_size == 0)
@@ -114,20 +121,23 @@ main (gint argc, gchar *argv[])
 
   g_print ("Max work group size: %lu\n", max_workgroup_size);
 
-  local_worksize = MIN (size, max_workgroup_size);
-  global_worksize = (size % local_worksize == 0) ?
-    size :
-    (size / local_worksize + 1) * local_worksize;
-
-  g_print ("Global work size: %lu\n", global_worksize);
-  g_print ("Local work size: %lu\n", local_worksize);
+  gocl_kernel_set_work_dimension (kernel, 2);
+  gocl_kernel_set_global_work_size (kernel,
+                                    WIDTH,
+                                    HEIGHT,
+                                    0);
+  gocl_kernel_set_local_work_size (kernel,
+                                   2,
+                                   2,
+                                   0);
 
   /* create data buffer */
-  data = g_slice_alloc0 (sizeof (guchar) * size);
+  data_size = sizeof (*data) * WIDTH * HEIGHT;
+  data = g_slice_alloc0 (data_size);
 
   buffer = gocl_context_create_buffer (context,
                                        GOCL_BUFFER_FLAGS_READ_WRITE,
-                                       sizeof (guchar) * size,
+                                       data_size,
                                        data,
                                        &error);
   if (buffer == NULL)
@@ -164,8 +174,6 @@ main (gint argc, gchar *argv[])
     {
       if (! gocl_kernel_run_in_device_sync (kernel,
                                             device,
-                                            global_worksize,
-                                            local_worksize,
                                             NULL,
                                             &error))
         {
@@ -190,13 +198,16 @@ main (gint argc, gchar *argv[])
     }
 
   /* print results */
-  if (SIZE < 500)
-    for (i=0; i<SIZE; i++)
-      g_print ("%d ", data[i]);
+  if (WIDTH * HEIGHT <= 32 * 32)
+    for (i=0; i<HEIGHT; i++) {
+      for (j=0; j<WIDTH; j++)
+        g_print ("%02x ", data[i * WIDTH + j]);
+      g_print ("\n");
+    }
   g_print ("\n");
 
   /* free stuff */
-  g_slice_free1 (SIZE, data);
+  g_slice_free1 (data_size, data);
 
   g_object_unref (buffer);
   g_object_unref (kernel);
