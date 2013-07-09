@@ -19,6 +19,9 @@
  * for more details.
  */
 
+#ifndef __GOCL_DECLS_H__
+#define __GOCL_DECLS_H__
+
 /**
  * SECTION:gocl-decls
  * @short_description: Global symbols used throughout Gocl API
@@ -27,9 +30,6 @@
  * Declarations common to Gocl classes. These symbols often map OpenCL symbols
  * directly.
  **/
-
-#ifndef __GOCL_DECLS_H__
-#define __GOCL_DECLS_H__
 
 #include <glib.h>
 #include <CL/opencl.h>
