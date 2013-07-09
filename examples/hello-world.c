@@ -263,6 +263,9 @@ main (gint argc, gchar *argv[])
 
   /* free stuff */
   g_slice_free1 (SIZE, data);
+#ifndef GLIB_VERSION_2_36
+  g_type_init ();
+#endif
 
   g_object_unref (buffer);
   g_object_unref (kernel);

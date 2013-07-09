@@ -43,7 +43,9 @@ main (gint argc, gchar *argv[])
   gsize global_worksize;
   guchar *data;
 
+#ifndef GLIB_VERSION_2_36
   g_type_init ();
+#endif
 
   /* create context */
 
