@@ -167,7 +167,7 @@ gocl_context_initable_init (GInitable     *initable,
 {
   GoclContext *self = GOCL_CONTEXT (initable);
   cl_int err_code = 0;
-  cl_context_properties props[3] = {0, };
+  cl_context_properties props[7] = {0, };
 
   /* get platform ids */
   if (gocl_num_platforms == 0)
@@ -192,6 +192,16 @@ gocl_context_initable_init (GInitable     *initable,
   /* setup context properties */
   props[0] = CL_CONTEXT_PLATFORM;
   props[1] = (cl_context_properties) self->priv->platform_id;
+
+  /* enable GL sharing, if a GL context and display are provided */
+  if (self->priv->gl_context != NULL && self->priv->gl_display != NULL)
+    {
+      props[2] = CL_GL_CONTEXT_KHR;
+      props[3] = (cl_context_properties) self->priv->gl_context;
+
+      props[4] = CL_GLX_DISPLAY_KHR;
+      props[5] = (cl_context_properties) self->priv->gl_display;
+    }
 
   /* create the context */
   self->priv->context = clCreateContextFromType (props,
