@@ -256,7 +256,7 @@ get_property (GObject    *obj,
 /* public */
 
 /**
- * gocl_context_new:
+ * gocl_context_new_sync:
  * @device_type: A value from #GoclDeviceType
  * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
@@ -267,7 +267,7 @@ get_property (GObject    *obj,
  * Returns: (transfer full): A newly created #GoclContext
  **/
 GoclContext *
-gocl_context_new (GoclDeviceType device_type, GError **error)
+gocl_context_new_sync (GoclDeviceType device_type, GError **error)
 {
   return g_initable_new (GOCL_TYPE_CONTEXT,
                          NULL,
@@ -277,7 +277,7 @@ gocl_context_new (GoclDeviceType device_type, GError **error)
 }
 
 /**
- * gocl_context_get_default_gpu:
+ * gocl_context_get_default_gpu_sync:
  * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Returns platform's default GPU context. The first call to this method will
@@ -288,18 +288,18 @@ gocl_context_new (GoclDeviceType device_type, GError **error)
  * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
-gocl_context_get_default_gpu (GError **error)
+gocl_context_get_default_gpu_sync (GError **error)
 {
   if (gocl_context_default_gpu != NULL)
     g_object_ref (gocl_context_default_gpu);
   else
-    gocl_context_default_gpu = gocl_context_new (CL_DEVICE_TYPE_GPU, error);
+    gocl_context_default_cpu = gocl_context_new_sync (CL_DEVICE_TYPE_GPU, error);
 
   return gocl_context_default_gpu;
 }
 
 /**
- * gocl_context_get_default_cpu:
+ * gocl_context_get_default_cpu_sync:
  * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Returns platform's default CPU context. The first call to this method will
@@ -310,12 +310,12 @@ gocl_context_get_default_gpu (GError **error)
  * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
-gocl_context_get_default_cpu (GError **error)
+gocl_context_get_default_cpu_sync (GError **error)
 {
   if (gocl_context_default_cpu != NULL)
     g_object_ref (gocl_context_default_cpu);
   else
-    gocl_context_default_cpu = gocl_context_new (CL_DEVICE_TYPE_CPU, error);
+    gocl_context_default_cpu = gocl_context_new_sync (CL_DEVICE_TYPE_CPU, error);
 
   return gocl_context_default_cpu;
 }
