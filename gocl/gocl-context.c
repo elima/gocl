@@ -28,10 +28,11 @@
  * queues, buffers, programs, kernels, etc. Obtaining a #GoclContext is always
  * the first step an OpenCL application performs.
  *
- * A #GoclContext can be created with gocl_context_new(), providing the type of
- * device which is a value from #GoclDeviceType. For convenience, the methods
- * gocl_context_get_default_cpu() and gocl_context_get_default_gpu() are
- * provided to easily retrieve pre-created CPU and GPU contexts, respectively.
+ * A #GoclContext can be created with gocl_context_new_sync(), providing the
+ * type of device which is a value from #GoclDeviceType. For convenience, the
+ * methods gocl_context_get_default_cpu_sync() and
+ * gocl_context_get_default_gpu_sync() are provided to easily retrieve
+ * pre-created CPU and GPU contexts, respectively.
  *
  * Once a context is successfully created, devices can be obtained by calling
  * gocl_context_get_device_by_index(), where index must be a value between 0 and

@@ -26,7 +26,7 @@
  *
  * A #GoclDevice object is not normally created directly. Instead, it is
  * obtained from a #GoclContext by calling any of gocl_context_get_device_by_index(),
- * gocl_context_get_default_gpu() or gocl_context_get_default_cpu().
+ * gocl_context_get_default_gpu_sync() or gocl_context_get_default_cpu_sync().
  *
  * To obtain the maximum work group size of a device,
  * gocl_device_get_max_work_group_size() is used. The number of compute units can be
