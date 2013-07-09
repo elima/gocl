@@ -66,6 +66,8 @@ GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self
 gboolean               gocl_device_has_extension              (GoclDevice   *self,
                                                                const gchar  *extension_name);
 
+guint                  gocl_device_get_max_compute_units      (GoclDevice *self);
+
 /* GoclQueue headers */
 GoclDevice *           gocl_queue_get_device                  (GoclQueue *self);
 

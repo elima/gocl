@@ -354,3 +354,37 @@ gocl_device_has_extension (GoclDevice *self, const gchar *extension_name)
   return
     g_strstr_len (self->priv->extensions, -1, extension_name) != NULL;
 }
+
+/**
+ * gocl_device_get_max_compute_units:
+ * @self: The #GoclDevice
+ *
+ * Retrieves the number of compute units in an OpenCL device, by querying
+ * CL_DEVICE_MAX_COMPUTE_UNITS in device info.
+ *
+ * Returns: The number of compute units in the device
+ **/
+guint
+gocl_device_get_max_compute_units (GoclDevice *self)
+{
+  cl_int err_code;
+  cl_uint max_compute_units;
+  GError *error = NULL;
+
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
+
+  err_code = clGetDeviceInfo (self->priv->device_id,
+                              CL_DEVICE_MAX_COMPUTE_UNITS,
+                              sizeof (guint),
+                              &max_compute_units,
+                              NULL);
+  if (gocl_error_check_opencl (err_code, &error))
+    {
+      g_warning ("Error getting device info for CL_DEVICE_MAX_COMPUTE_UNITS: %s",
+                 error->message);
+      g_error_free (error);
+      return 0;
+    }
+
+  return (guint) max_compute_units;
+}
