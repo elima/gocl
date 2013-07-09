@@ -353,8 +353,6 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
  * gocl_kernel_run_in_device_sync:
  * @self: The #GoclKernel
  * @device: A #GoclDevice to run the kernel on
- * @global_work_size: The global work group size
- * @local_work_size: The local work group size
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List of #GoclEvent
  * events to wait for, or %NULL
  * @error: (out) (allow-none): A pointer to a #GError, or %NULL
@@ -371,8 +369,6 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
 gboolean
 gocl_kernel_run_in_device_sync (GoclKernel  *self,
                                 GoclDevice  *device,
-                                gsize        global_work_size,
-                                gsize        local_work_size,
                                 GList       *event_wait_list,
                                 GError     **error)
 {
@@ -393,15 +389,18 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
 
   _queue = gocl_queue_get_queue (queue);
 
-  err_code = clEnqueueNDRangeKernel (_queue,
-                                     self->priv->kernel,
-                                     1,
-                                     NULL,
-                                     &global_work_size,
-                                     &local_work_size,
-                                     g_list_length (event_wait_list),
-                                     _event_wait_list,
-                                     &event);
+  err_code =
+    clEnqueueNDRangeKernel (_queue,
+                            self->priv->kernel,
+                            self->priv->work_dim,
+                            NULL,
+                            self->priv->global_work_size[0] == 0 ?
+                              NULL : (gsize *) &self->priv->global_work_size,
+                            self->priv->local_work_size[0] == 0 ?
+                              NULL : (gsize *) &self->priv->local_work_size,
+                            g_list_length (event_wait_list),
+                            _event_wait_list,
+                            &event);
   g_free (_event_wait_list);
 
   if (gocl_error_check_opencl (err_code, error))
@@ -417,8 +416,6 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
  * gocl_kernel_run_in_device:
  * @self: The #GoclKernel
  * @device: A #GoclDevice to run the kernel on
- * @global_work_size: The global work group size
- * @local_work_size: The local work group size
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List of #GoclEvent
  * events to wait for, or %NULL
  *
@@ -435,8 +432,6 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
 GoclEvent *
 gocl_kernel_run_in_device (GoclKernel *self,
                            GoclDevice *device,
-                           gsize       global_work_size,
-                           gsize       local_work_size,
                            GList      *event_wait_list)
 {
   GError *error = NULL;
@@ -464,15 +459,18 @@ gocl_kernel_run_in_device (GoclKernel *self,
 
   _queue = gocl_queue_get_queue (queue);
 
-  err_code = clEnqueueNDRangeKernel (_queue,
-                                     self->priv->kernel,
-                                     1,
-                                     NULL,
-                                     &global_work_size,
-                                     &local_work_size,
-                                     event_wait_list_len,
-                                     _event_wait_list,
-                                     &event);
+  err_code =
+    clEnqueueNDRangeKernel (_queue,
+                            self->priv->kernel,
+                            self->priv->work_dim,
+                            NULL,
+                            self->priv->global_work_size[0] == 0 ?
+                              NULL : (gsize *) &self->priv->global_work_size,
+                            self->priv->local_work_size[0] == 0 ?
+                              NULL : (gsize *) &self->priv->local_work_size,
+                            event_wait_list_len,
+                            _event_wait_list,
+                            &event);
   g_free (_event_wait_list);
 
   if (! gocl_error_check_opencl (err_code, &error))

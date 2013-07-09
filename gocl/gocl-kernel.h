@@ -73,14 +73,10 @@ gboolean               gocl_kernel_set_argument_buffer        (GoclKernel  *self
 
 gboolean               gocl_kernel_run_in_device_sync         (GoclKernel  *self,
                                                                GoclDevice  *device,
-                                                               gsize        global_work_size,
-                                                               gsize        local_work_size,
                                                                GList       *event_wait_list,
                                                                GError     **error);
 GoclEvent *            gocl_kernel_run_in_device              (GoclKernel  *self,
                                                                GoclDevice  *device,
-                                                               gsize        global_work_size,
-                                                               gsize        local_work_size,
                                                                GList       *event_wait_list);
 
 void                   gocl_kernel_set_work_dimension         (GoclKernel *self,
