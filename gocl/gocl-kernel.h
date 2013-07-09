@@ -89,6 +89,10 @@ void                   gocl_kernel_set_global_work_size       (GoclKernel *self,
                                                                gsize       size1,
                                                                gsize       size2,
                                                                gsize       size3);
+void                   gocl_kernel_set_local_work_size        (GoclKernel *self,
+                                                               gsize       size1,
+                                                               gsize       size2,
+                                                               gsize       size3);
 
 G_END_DECLS
 
