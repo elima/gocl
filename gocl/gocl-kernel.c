@@ -510,6 +510,7 @@ void
 gocl_kernel_set_work_dimension (GoclKernel *self, guint8 work_dim)
 {
   g_return_if_fail (GOCL_IS_KERNEL (self));
+  g_return_if_fail (work_dim > 0 && work_dim <= 3);
 
   self->priv->work_dim = work_dim;
 }
