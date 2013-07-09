@@ -61,6 +61,8 @@
 #include "gocl-error.h"
 #include "gocl-program.h"
 
+typedef gsize WorkSize[3];
+
 struct _GoclKernelPrivate
 {
   cl_kernel kernel;
@@ -68,6 +70,7 @@ struct _GoclKernelPrivate
 
   GoclProgram *program;
 
+  WorkSize global_work_size;
   guint8 work_dim;
 };
 
@@ -165,6 +168,7 @@ gocl_kernel_init (GoclKernel *self)
   self->priv = priv = GOCL_KERNEL_GET_PRIVATE (self);
 
   priv->work_dim = 1;
+  memset (&priv->global_work_size, 0, 3);
 }
 
 static void
@@ -508,4 +512,31 @@ gocl_kernel_set_work_dimension (GoclKernel *self, guint8 work_dim)
   g_return_if_fail (GOCL_IS_KERNEL (self));
 
   self->priv->work_dim = work_dim;
+}
+
+/**
+ * gocl_kernel_set_global_work_size:
+ * @self: The #GoclKernel
+ * @size1: global work size for the first dimension
+ * @size2: global work size for the second dimension
+ * @size3: global work size for the third dimension
+ *
+ * Sets the global work sizes to use when executing the kernel, corresponding
+ * to the first, second, and third dimensions, respectively. By default, the
+ * sizes are all zeros.
+ *
+ * If the @size1 value is zero, it means no global work size is specified and
+ * %NULL will be used when enqueuing the kernel.
+ **/
+void
+gocl_kernel_set_global_work_size (GoclKernel *self,
+                                  gsize       size1,
+                                  gsize       size2,
+                                  gsize       size3)
+{
+  g_return_if_fail (GOCL_IS_KERNEL (self));
+
+  self->priv->global_work_size[0] = size1;
+  self->priv->global_work_size[1] = size2;
+  self->priv->global_work_size[2] = size3;
 }

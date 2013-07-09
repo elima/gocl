@@ -85,6 +85,10 @@ GoclEvent *            gocl_kernel_run_in_device              (GoclKernel  *self
 
 void                   gocl_kernel_set_work_dimension         (GoclKernel *self,
                                                                guint8      work_dim);
+void                   gocl_kernel_set_global_work_size       (GoclKernel *self,
+                                                               gsize       size1,
+                                                               gsize       size2,
+                                                               gsize       size3);
 
 G_END_DECLS
 
