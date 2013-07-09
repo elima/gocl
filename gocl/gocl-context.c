@@ -294,7 +294,7 @@ gocl_context_get_default_gpu_sync (GError **error)
   if (gocl_context_default_gpu != NULL)
     g_object_ref (gocl_context_default_gpu);
   else
-    gocl_context_default_cpu = gocl_context_new_sync (CL_DEVICE_TYPE_GPU, error);
+    gocl_context_default_gpu = gocl_context_new_sync (CL_DEVICE_TYPE_GPU, error);
 
   return gocl_context_default_gpu;
 }
