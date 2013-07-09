@@ -230,7 +230,7 @@ main (gint argc, gchar *argv[])
   /* create context */
 
   /* First attempt to create a GPU context and if that fails,try with CPU */
-  context = gocl_context_get_default_gpu (&error);
+  context = gocl_context_get_default_gpu_sync (&error);
   if (context == NULL)
     {
       g_print ("Failed to create GPU context (%d): %s\n",
@@ -239,9 +239,8 @@ main (gint argc, gchar *argv[])
       g_error_free (error);
       error = NULL;
 
-
       g_print ("Trying with CPU context... ");
-      context = gocl_context_get_default_cpu (&error);
+      context = gocl_context_get_default_cpu_sync (&error);
       if (context == NULL)
         {
           g_print ("Failed to create CPU context: %s\n", error->message);
