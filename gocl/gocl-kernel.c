@@ -67,6 +67,8 @@ struct _GoclKernelPrivate
   gchar *name;
 
   GoclProgram *program;
+
+  guint8 work_dim;
 };
 
 /* properties */
@@ -161,6 +163,8 @@ gocl_kernel_init (GoclKernel *self)
   GoclKernelPrivate *priv;
 
   self->priv = priv = GOCL_KERNEL_GET_PRIVATE (self);
+
+  priv->work_dim = 1;
 }
 
 static void
@@ -489,4 +493,19 @@ gocl_kernel_run_in_device (GoclKernel *self,
   gocl_event_idle_unref (_event);
 
   return _event;
+}
+
+/**
+ * gocl_kernel_set_work_dimension:
+ * @self: The #GoclKernel
+ * @work_dim: The work dimension
+ *
+ * Sets the work dimension (1, 2, 3) to use when executing the kernel.
+ **/
+void
+gocl_kernel_set_work_dimension (GoclKernel *self, guint8 work_dim)
+{
+  g_return_if_fail (GOCL_IS_KERNEL (self));
+
+  self->priv->work_dim = work_dim;
 }
