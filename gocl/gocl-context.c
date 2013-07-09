@@ -73,6 +73,9 @@ struct _GoclContextPrivate
 
   cl_device_id devices[MAX_DEVICES];
   cl_uint num_devices;
+
+  gpointer gl_context;
+  gpointer gl_display;
 };
 
 static cl_platform_id gocl_platforms[MAX_PLATFORMS];
@@ -85,7 +88,9 @@ static GoclContext *gocl_context_default_cpu = NULL;
 enum
 {
   PROP_0,
-  PROP_DEVICE_TYPE
+  PROP_DEVICE_TYPE,
+  PROP_GL_CONTEXT,
+  PROP_GL_DISPLAY
 };
 
 static void           gocl_context_class_init            (GoclContextClass *class);
@@ -132,6 +137,19 @@ gocl_context_class_init (GoclContextClass *class)
                                                       GOCL_DEVICE_TYPE_DEFAULT,
                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
                                                       G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (obj_class, PROP_GL_CONTEXT,
+                                   g_param_spec_pointer ("gl-context",
+                                                         "GL context",
+                                                         "The GL context for data sharing",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
+                                                         G_PARAM_STATIC_STRINGS));
+  g_object_class_install_property (obj_class, PROP_GL_DISPLAY,
+                                   g_param_spec_pointer ("gl-display",
+                                                         "GL display",
+                                                         "The GL display for data sharing",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
+                                                         G_PARAM_STATIC_STRINGS));
 
   g_type_class_add_private (class, sizeof (GoclContextPrivate));
 }
@@ -226,6 +244,14 @@ set_property (GObject      *obj,
       self->priv->device_type = g_value_get_uint (value);
       break;
 
+    case PROP_GL_CONTEXT:
+      self->priv->gl_context = g_value_get_pointer (value);
+      break;
+
+    case PROP_GL_DISPLAY:
+      self->priv->gl_display = g_value_get_pointer (value);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
@@ -246,6 +272,14 @@ get_property (GObject    *obj,
     {
     case PROP_DEVICE_TYPE:
       g_value_set_uint (value, self->priv->device_type);
+      break;
+
+    case PROP_GL_CONTEXT:
+      g_value_set_pointer (value, self->priv->gl_context);
+      break;
+
+    case PROP_GL_DISPLAY:
+      g_value_set_pointer (value, self->priv->gl_display);
       break;
 
     default:
