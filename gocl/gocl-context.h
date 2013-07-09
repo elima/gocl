@@ -58,6 +58,10 @@ GType                  gocl_context_get_type                   (void) G_GNUC_CON
 
 GoclContext *          gocl_context_new_sync                   (GoclDeviceType   device_type,
                                                                 GError         **error);
+GoclContext *          gocl_context_gpu_new_sync               (gpointer   gl_context,
+                                                                gpointer   gl_display,
+                                                                GError   **error);
+
 GoclContext *          gocl_context_get_default_cpu_sync       (GError **error);
 GoclContext *          gocl_context_get_default_gpu_sync       (GError **error);
 

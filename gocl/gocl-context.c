@@ -34,6 +34,11 @@
  * gocl_context_get_default_gpu_sync() are provided to easily retrieve
  * pre-created CPU and GPU contexts, respectively.
  *
+ * For GPU devices, it is possible to share object with existing OpenGL contexts
+ * if the <i>cl_khr_gl_sharing</i> extension is supported. To enable this
+ * support, gocl_context_gpu_new_sync() is used, passing the pointers to the
+ * corresponding GL context and display.
+ *
  * Once a context is successfully created, devices can be obtained by calling
  * gocl_context_get_device_by_index(), where index must be a value between 0 and
  * the maximum number of devices in the context, minus one. Number of devices can
@@ -318,6 +323,34 @@ gocl_context_new_sync (GoclDeviceType device_type, GError **error)
                          NULL,
                          error,
                          "device-type", device_type,
+                         NULL);
+}
+
+/**
+ * gocl_context_gpu_new_sync:
+ * @gl_context: (allow-none): A GL context, or %NULL
+ * @gl_display: (allow-none): A GL display, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Attemps to create a new GPU context. If @gl_context and @gl_display
+ * are provided (not %NULL), then the context will be setup to share
+ * objects with an existing OpenGL context. For this to work, the
+ * <i>cl_khr_gl_sharing</i> extension should be supported by the OpenCL
+ * GPU implementation.
+ *
+ * Returns: (transfer full): A #GoclContext object, or %NULL on error
+ **/
+GoclContext *
+gocl_context_gpu_new_sync (gpointer   gl_context,
+                           gpointer   gl_display,
+                           GError   **error)
+{
+  return g_initable_new (GOCL_TYPE_CONTEXT,
+                         NULL,
+                         error,
+                         "device-type", GOCL_DEVICE_TYPE_GPU,
+                         "gl-context", gl_context,
+                         "gl-display", gl_display,
                          NULL);
 }
 
