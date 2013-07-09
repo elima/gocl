@@ -28,8 +28,9 @@
  * obtained from a #GoclContext by calling any of gocl_context_get_device_by_index(),
  * gocl_context_get_default_gpu() or gocl_context_get_default_cpu().
  *
- * To obtain the work group size of a device, gocl_device_get_max_work_group_size()
- * is used.
+ * To obtain the maximum work group size of a device,
+ * gocl_device_get_max_work_group_size() is used. The number of compute units can be
+ * retrieved with gocl_device_get_max_compute_units().
  *
  * To enqueue operations on this device, a #GoclQueue provides a default command queue
  * which is obtained by calling gocl_device_get_default_queue(). More device queues can
