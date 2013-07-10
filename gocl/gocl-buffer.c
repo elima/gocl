@@ -95,6 +95,13 @@ static void           get_property                      (GObject    *obj,
                                                          GValue     *value,
                                                          GParamSpec *pspec);
 
+static gboolean       create_cl_mem                     (GoclBuffer  *self,
+                                                         cl_context   context,
+                                                         cl_mem      *obj,
+                                                         guint        flags,
+                                                         gsize        size,
+                                                         GError     **error);
+
 G_DEFINE_TYPE_WITH_CODE (GoclBuffer, gocl_buffer, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gocl_buffer_initable_iface_init));
@@ -112,6 +119,8 @@ gocl_buffer_class_init (GoclBufferClass *class)
   obj_class->finalize = gocl_buffer_finalize;
   obj_class->get_property = get_property;
   obj_class->set_property = set_property;
+
+  class->create_cl_mem = create_cl_mem;
 
   g_object_class_install_property (obj_class, PROP_CONTEXT,
                                    g_param_spec_object ("context",
@@ -156,20 +165,16 @@ gocl_buffer_initable_init (GInitable     *initable,
                             GError       **error)
 {
   GoclBuffer *self = GOCL_BUFFER (initable);
-  cl_int err_code = 0;
   cl_context ctx;
 
   ctx = gocl_context_get_context (self->priv->context);
 
-  self->priv->buf = clCreateBuffer (ctx,
-                                    self->priv->flags,
-                                    self->priv->size,
-                                    NULL,
-                                    &err_code);
-  if (gocl_error_check_opencl (err_code, error))
-    return FALSE;
-
-  return TRUE;
+  return GOCL_BUFFER_GET_CLASS (self)->create_cl_mem (self,
+                                                      ctx,
+                                                      &self->priv->buf,
+                                                      self->priv->flags,
+                                                      self->priv->size,
+                                                      error);
 }
 
 static void
@@ -248,6 +253,27 @@ get_property (GObject    *obj,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
     }
+}
+
+static gboolean
+create_cl_mem (GoclBuffer  *self,
+               cl_context   context,
+               cl_mem      *obj,
+               guint        flags,
+               gsize        size,
+               GError     **error)
+{
+  cl_int err_code = 0;
+
+  *obj = clCreateBuffer (context,
+                         flags,
+                         size,
+                         NULL,
+                         &err_code);
+  if (gocl_error_check_opencl (err_code, error))
+    return FALSE;
+  else
+    return TRUE;
 }
 
 /* public */

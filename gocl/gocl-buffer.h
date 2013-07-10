@@ -52,6 +52,14 @@ struct _GoclBuffer
 struct _GoclBufferClass
 {
   GObjectClass parent_class;
+
+  /* virtual methods */
+  gboolean (* create_cl_mem) (GoclBuffer  *self,
+                              cl_context   context,
+                              cl_mem      *obj,
+                              guint        flags,
+                              gsize        size,
+                              GError     **error);
 };
 
 GType                  gocl_buffer_get_type                   (void) G_GNUC_CONST;
