@@ -60,6 +60,9 @@ GoclProgram *          gocl_program_new                        (GoclContext  *co
                                                                 const gchar **sources,
                                                                 guint         num_sources,
                                                                 GError      **error);
+GoclProgram *          gocl_program_new_from_file_sync         (GoclContext  *context,
+                                                                const gchar  *filename,
+                                                                GError      **error);
 
 cl_program             gocl_program_get_program                (GoclProgram *self);
 

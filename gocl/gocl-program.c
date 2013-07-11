@@ -29,6 +29,9 @@
  *
  * A #GoclProgram is created with gocl_program_new(), provinding a
  * null-terminated array of strings, each one representing OpenCL source code.
+ * Alternative;y, gocl_program_new_from_file_sync() can be used for simple cases
+ * when source code is in a single file.
+ *
  * Currently, creating a program from pre-compiled, binary code is not supported,
  * but will be in the future.
  *
@@ -249,6 +252,45 @@ gocl_program_new (GoclContext  *context,
                                                    &err_code);
   if (gocl_error_check_opencl (err_code, error))
     return NULL;
+
+  return self;
+}
+
+/**
+ * gocl_program_new_from_file_sync:
+ * @context: The #GoclContext
+ * @filename: The source code file
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Creates and returns a new #GoclProgram. This is a convenient constructor for
+ * cases when there is only one file containing the source code. Upon error,
+ * %NULL is returned and @error is filled accordingly.
+ *
+ * Returns: (transfer full): A newly created #GoclProgram, or %NULL on error
+ **/
+GoclProgram *
+gocl_program_new_from_file_sync (GoclContext  *context,
+                                 const gchar  *filename,
+                                 GError      **error)
+{
+  gchar *source;
+  GoclProgram *self;
+
+  g_return_val_if_fail (filename != NULL, NULL);
+
+  if (! g_file_get_contents (filename,
+                             &source,
+                             NULL,
+                             error))
+    {
+      return NULL;
+    }
+
+  self = gocl_program_new (context,
+                           (const gchar **) &source,
+                           1,
+                           error);
+  g_free (source);
 
   return self;
 }
