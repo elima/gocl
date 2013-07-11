@@ -90,6 +90,25 @@ typedef enum
   GOCL_QUEUE_FLAGS_PROFILING    = CL_QUEUE_PROFILING_ENABLE
 } GoclQueueFlags;
 
+/**
+ * GoclImageType:
+ * @GOCL_IMAGE_TYPE_1D:        Unidimensional image
+ * @GOCL_IMAGE_TYPE_1D_BUFFER: Unidimensional buffer image
+ * @GOCL_IMAGE_TYPE_1D_ARRAY:  Array of unidimensional images
+ * @GOCL_IMAGE_TYPE_2D:        Bidimensional image
+ * @GOCL_IMAGE_TYPE_2D_ARRAY:  Array of bidimensional images
+ * @GOCL_IMAGE_TYPE_3D:        Tridimensional image
+ **/
+typedef enum
+{
+  GOCL_IMAGE_TYPE_1D        = CL_MEM_OBJECT_IMAGE1D,
+  GOCL_IMAGE_TYPE_1D_BUFFER = CL_MEM_OBJECT_IMAGE1D_BUFFER,
+  GOCL_IMAGE_TYPE_1D_ARRAY  = CL_MEM_OBJECT_IMAGE1D_ARRAY,
+  GOCL_IMAGE_TYPE_2D        = CL_MEM_OBJECT_IMAGE2D,
+  GOCL_IMAGE_TYPE_2D_ARRAY  = CL_MEM_OBJECT_IMAGE2D_ARRAY,
+  GOCL_IMAGE_TYPE_3D        = CL_MEM_OBJECT_IMAGE3D
+} GoclImageType;
+
 G_END_DECLS
 
 #endif /* __GOCL_DECLS_H__ */
