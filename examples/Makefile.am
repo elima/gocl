@@ -1,9 +1,12 @@
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
+examples_dir = `pwd`/
+
 AM_CFLAGS = \
 	$(GLIB_CFLAGS) \
-	-I$(top_srcdir)/gocl
+	-I$(top_srcdir)/gocl \
+	-DEXAMPLES_DIR="\"$(examples_dir)\""
 
 if ENABLE_DEBUG
 AM_CFLAGS += -Wall -Werror -g3 -O0 -ggdb
