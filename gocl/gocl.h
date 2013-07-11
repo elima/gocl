@@ -29,6 +29,7 @@
 #include <gocl-program.h>
 #include <gocl-kernel.h>
 #include <gocl-queue.h>
+#include <gocl-image.h>
 
 G_BEGIN_DECLS
 
