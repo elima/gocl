@@ -85,6 +85,19 @@ GoclContext *          gocl_device_get_context                 (GoclDevice *devi
 /* GoclBuffer headers */
 GoclContext *          gocl_buffer_get_context                 (GoclBuffer *buffer);
 
+/* GoclImage headers */
+GoclImage *            gocl_image_new                          (GoclContext    *context,
+                                                                guint           flags,
+                                                                GoclImageType   type,
+                                                                gsize           width,
+                                                                gsize           height,
+                                                                gsize           depth,
+                                                                GError        **error);
+GoclImage *            gocl_image_new_from_gl_texture          (GoclContext  *context,
+                                                                guint         flags,
+                                                                guint         texture,
+                                                                GError      **error);
+
 G_END_DECLS
 
 #endif /* __GOCL_CONTEXT_H__ */
