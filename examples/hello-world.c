@@ -97,8 +97,8 @@ on_program_built (GObject      *obj,
                                     HEIGHT,
                                     0);
   gocl_kernel_set_local_work_size (kernel,
-                                   2,
-                                   2,
+                                   0,
+                                   0,
                                    0);
 
   /* create data buffer */

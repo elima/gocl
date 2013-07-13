@@ -110,8 +110,8 @@ main (gint argc, gchar *argv[])
                                     HEIGHT,
                                     0);
   gocl_kernel_set_local_work_size (kernel,
-                                   2,
-                                   2,
+                                   0,
+                                   0,
                                    0);
 
   /* create data buffer */
@@ -207,7 +207,7 @@ main (gint argc, gchar *argv[])
     }
   else
     {
-      g_print ("Exit clean :)\n");
+      g_print ("Clean exit :)\n");
     }
 
   return exit_code;
