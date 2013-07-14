@@ -121,7 +121,7 @@ main (gint argc, gchar *argv[])
   buffer = gocl_context_create_buffer (context,
                                        GOCL_BUFFER_FLAGS_READ_WRITE,
                                        data_size,
-                                       data,
+                                       NULL,
                                        &error);
   if (buffer == NULL)
     {
