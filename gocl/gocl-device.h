@@ -68,6 +68,11 @@ gboolean               gocl_device_has_extension              (GoclDevice   *sel
 
 guint                  gocl_device_get_max_compute_units      (GoclDevice *self);
 
+gboolean               gocl_device_acquire_gl_objects_sync    (GoclDevice  *self,
+                                                               GList       *object_list,
+                                                               GList       *event_wait_list,
+                                                               GError     **error);
+
 /* GoclQueue headers */
 GoclDevice *           gocl_queue_get_device                  (GoclQueue *self);
 
