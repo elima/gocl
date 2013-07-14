@@ -66,6 +66,11 @@ gboolean               gocl_kernel_set_argument_int32         (GoclKernel  *self
                                                                gsize        num_elements,
                                                                gint32      *buffer,
                                                                GError     **error);
+gboolean               gocl_kernel_set_argument_float         (GoclKernel  *self,
+                                                               guint        index,
+                                                               gsize        num_elements,
+                                                               gfloat      *buffer,
+                                                               GError     **error);
 gboolean               gocl_kernel_set_argument_buffer        (GoclKernel  *self,
                                                                guint        index,
                                                                GoclBuffer  *buffer,

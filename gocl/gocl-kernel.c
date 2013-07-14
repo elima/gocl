@@ -312,7 +312,34 @@ gocl_kernel_set_argument_int32 (GoclKernel  *self,
 {
   return gocl_kernel_set_argument (self,
                                    index,
-                                   sizeof (gint32) * num_elements,
+                                   sizeof (cl_uint) * num_elements,
+                                   (const gpointer) buffer,
+                                   error);
+}
+
+/**
+ * gocl_kernel_set_argument_float:
+ * @self: The #GoclKernel
+ * @index: The index of this argument in the kernel function
+ * @num_elements: The number of float elements in @buffer
+ * @buffer: (array length=num_elements) (element-type gfloat): Array of float
+ * values
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Sets the value of the kernel argument at @index, as an array of floats.
+ *
+ * Returns: %TRUE on success, %FALSE on error
+ **/
+gboolean
+gocl_kernel_set_argument_float (GoclKernel  *self,
+                                guint        index,
+                                gsize        num_elements,
+                                gfloat      *buffer,
+                                GError     **error)
+{
+  return gocl_kernel_set_argument (self,
+                                   index,
+                                   sizeof (cl_float) * num_elements,
                                    (const gpointer) buffer,
                                    error);
 }
