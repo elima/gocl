@@ -614,3 +614,50 @@ gocl_buffer_write_sync (GoclBuffer      *self,
 
   return ! gocl_error_check_opencl (err_code, error);
 }
+
+/**
+ * gocl_buffer_list_to_array:
+ * @list: (element-type Gocl.Buffer) (allow-none): A #GList containing
+ * #GoclBuffer objects
+ * @len: (out) (allow-none): A pointer to a value to retrieve list length
+ *
+ * A convenient method to retrieve a #GList of #GoclBuffer's as an array of
+ * #cl_mem's corresponding to the internal objects of each #GoclBuffer in
+ * the #GList. This is a rather low-level method and should not normally be
+ * called by applications.
+ *
+ * Returns: (transfer container) (array length=len): An array of #cl_mem
+ *   objects. Free with g_free().
+ **/
+cl_mem *
+gocl_buffer_list_to_array (GList *list, guint *len)
+{
+  cl_mem *arr = NULL;
+  gint i;
+  guint _len;
+  GList *node;
+
+  _len = g_list_length (list);
+
+  if (len != NULL)
+    *len = _len;
+
+  if (_len == 0)
+    return arr;
+
+  arr = g_new (cl_mem, g_list_length (list));
+
+  node = list;
+  i = 0;
+  while (node != NULL)
+    {
+      g_return_val_if_fail (GOCL_IS_BUFFER (node->data), NULL);
+
+      arr[i] = gocl_buffer_get_buffer (GOCL_BUFFER (node->data));
+
+      i++;
+      node = g_list_next (node);
+    }
+
+  return arr;
+}

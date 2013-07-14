@@ -94,6 +94,9 @@ gboolean               gocl_buffer_write_sync                 (GoclBuffer      *
                                                                GList           *event_wait_list,
                                                                GError         **error);
 
+cl_mem *               gocl_buffer_list_to_array              (GList *list,
+                                                               guint *len);
+
 G_END_DECLS
 
 #endif /* __GOCL_BUFFER_H__ */
