@@ -67,6 +67,7 @@ struct _GoclBufferPrivate
 
   guint flags;
   gsize size;
+  gpointer host_ptr;
 };
 
 /* properties */
@@ -75,7 +76,8 @@ enum
   PROP_0,
   PROP_CONTEXT,
   PROP_FLAGS,
-  PROP_SIZE
+  PROP_SIZE,
+  PROP_HOST_PTR
 };
 
 static void           gocl_buffer_class_init            (GoclBufferClass *class);
@@ -150,6 +152,13 @@ gocl_buffer_class_init (GoclBufferClass *class)
                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS));
 
+  g_object_class_install_property (obj_class, PROP_HOST_PTR,
+                                   g_param_spec_pointer ("host-ptr",
+                                                         "Host pointer",
+                                                         "The host pointer used by this buffer",
+                                                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
+                                                         G_PARAM_STATIC_STRINGS));
+
   g_type_class_add_private (class, sizeof (GoclBufferPrivate));
 }
 
@@ -183,6 +192,8 @@ gocl_buffer_init (GoclBuffer *self)
   GoclBufferPrivate *priv;
 
   self->priv = priv = GOCL_BUFFER_GET_PRIVATE (self);
+
+  priv->host_ptr = NULL;
 }
 
 static void
@@ -219,6 +230,10 @@ set_property (GObject      *obj,
       self->priv->size = g_value_get_uint64 (value);
       break;
 
+    case PROP_HOST_PTR:
+      self->priv->host_ptr = g_value_get_pointer (value);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
@@ -247,6 +262,10 @@ get_property (GObject    *obj,
 
     case PROP_SIZE:
       g_value_set_uint64 (value, self->priv->size);
+      break;
+
+    case PROP_HOST_PTR:
+      g_value_set_pointer (value, self->priv->host_ptr);
       break;
 
     default:
