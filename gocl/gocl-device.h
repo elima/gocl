@@ -72,6 +72,10 @@ gboolean               gocl_device_acquire_gl_objects_sync    (GoclDevice  *self
                                                                GList       *object_list,
                                                                GList       *event_wait_list,
                                                                GError     **error);
+gboolean               gocl_device_release_gl_objects_sync    (GoclDevice  *self,
+                                                               GList       *object_list,
+                                                               GList       *event_wait_list,
+                                                               GError     **error);
 
 /* GoclQueue headers */
 GoclDevice *           gocl_queue_get_device                  (GoclQueue *self);

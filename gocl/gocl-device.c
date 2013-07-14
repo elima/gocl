@@ -461,3 +461,72 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
 
   return TRUE;
 }
+
+/**
+ * gocl_device_release_gl_objects_sync:
+ * @self: The #GoclDevice
+ * @object_list: (element-type Gocl.Buffer) (allow-none): A #GList of
+ * #GoclBuffer objects, or %NULL
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * objects to wait for, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Enqueues a request for releasing the #GoclBuffer (or deriving) objects
+ * contained in @object_list, which were previously acquired by a call to
+ * gocl_device_acquire_gl_objects_sync().
+ *
+ * Upon success, %TRUE is returned, otherwise %FALSE is returned and @error is
+ * filled accordingly.
+ *
+ * Returns: %TRUE on success, %FALSE on error
+ **/
+gboolean
+gocl_device_release_gl_objects_sync (GoclDevice  *self,
+                                     GList       *object_list,
+                                     GList       *event_wait_list,
+                                     GError     **error)
+{
+  cl_int err_code;
+  cl_event event;
+  GoclQueue *queue;
+  cl_command_queue _queue;
+
+  cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
+
+  cl_mem *_object_list;
+  guint object_list_len;
+
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
+
+  if (object_list == NULL)
+    return TRUE;
+
+  queue = gocl_device_get_default_queue (self, error);
+  if (queue == NULL)
+    return FALSE;
+
+  _queue = gocl_queue_get_queue (queue);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+  _object_list = gocl_buffer_list_to_array (object_list,
+                                            &object_list_len);
+
+  err_code = clEnqueueReleaseGLObjects (_queue,
+                                        object_list_len,
+                                        _object_list,
+                                        event_wait_list_len,
+                                        _event_wait_list,
+                                        &event);
+  g_free (_event_wait_list);
+  g_free (_object_list);
+
+  if (gocl_error_check_opencl (err_code, error))
+    return FALSE;
+
+  clWaitForEvents (1, &event);
+  clReleaseEvent (event);
+
+  return TRUE;
+}
