@@ -60,6 +60,9 @@ typedef enum
  * @GOCL_BUFFER_FLAGS_WRITE_ONLY:     The buffer can be written but not read
  *                                    by a kernel. Reading from the buffer
  *                                    inside a kernel is undefined.
+ * @GOCL_BUFFER_FLAGS_READ_ONLY:      The buffer can be read but not written
+ *                                    by a kernel. Writing to the buffer
+ *                                    inside a kernel is undefined.
  * @GOCL_BUFFER_FLAGS_USE_HOST_PTR:   The buffer is initialized with the data
  *                                    referenced by the provided host memory
  *                                    pointer.
@@ -74,6 +77,7 @@ typedef enum
 {
   GOCL_BUFFER_FLAGS_READ_WRITE     = CL_MEM_READ_WRITE,
   GOCL_BUFFER_FLAGS_WRITE_ONLY     = CL_MEM_WRITE_ONLY,
+  GOCL_BUFFER_FLAGS_READ_ONLY      = CL_MEM_READ_ONLY,
   GOCL_BUFFER_FLAGS_USE_HOST_PTR   = CL_MEM_USE_HOST_PTR,
   GOCL_BUFFER_FLAGS_ALLOC_HOST_PTR = CL_MEM_ALLOC_HOST_PTR,
   GOCL_BUFFER_FLAGS_COPY_HOST_PTR  = CL_MEM_COPY_HOST_PTR
