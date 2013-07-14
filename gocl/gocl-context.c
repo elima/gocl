@@ -492,6 +492,7 @@ gocl_context_create_buffer (GoclContext  *self,
                            "context", self,
                            "flags", flags,
                            "size", size,
+                           "host-ptr", host_ptr,
                            NULL);
 
   return buffer;

@@ -88,6 +88,7 @@ GoclContext *          gocl_buffer_get_context                 (GoclBuffer *buff
 /* GoclImage headers */
 GoclImage *            gocl_image_new                          (GoclContext    *context,
                                                                 guint           flags,
+                                                                gpointer        host_ptr,
                                                                 GoclImageType   type,
                                                                 gsize           width,
                                                                 gsize           height,

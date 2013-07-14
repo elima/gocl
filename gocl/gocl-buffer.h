@@ -59,6 +59,7 @@ struct _GoclBufferClass
                               cl_mem      *obj,
                               guint        flags,
                               gsize        size,
+                              gpointer     host_ptr,
                               GError     **error);
 };
 

@@ -86,6 +86,7 @@ static gboolean       create_cl_mem                       (GoclBuffer  *buffer,
                                                            cl_mem      *obj,
                                                            guint        flags,
                                                            gsize        size,
+                                                           gpointer     host_ptr,
                                                            GError     **error);
 
 G_DEFINE_TYPE (GoclImage, gocl_image, GOCL_TYPE_BUFFER)
@@ -287,6 +288,7 @@ create_cl_mem (GoclBuffer  *buffer,
                cl_mem      *obj,
                guint        flags,
                gsize        size,
+               gpointer     host_ptr,
                GError     **error)
 {
   GoclImage *self = GOCL_IMAGE (buffer);
@@ -320,7 +322,7 @@ create_cl_mem (GoclBuffer  *buffer,
                             flags,
                             &format,
                             &self->priv->props,
-                            NULL,
+                            host_ptr,
                             &err_code);
     }
 
@@ -352,6 +354,7 @@ create_cl_mem (GoclBuffer  *buffer,
 GoclImage *
 gocl_image_new (GoclContext    *context,
                 guint           flags,
+                gpointer        host_ptr,
                 GoclImageType   type,
                 gsize           width,
                 gsize           height,
@@ -365,6 +368,7 @@ gocl_image_new (GoclContext    *context,
                          error,
                          "context", context,
                          "flags", flags,
+                         "host-ptr", host_ptr,
                          "type", type,
                          "width", width,
                          "height", height,

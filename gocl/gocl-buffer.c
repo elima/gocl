@@ -102,6 +102,7 @@ static gboolean       create_cl_mem                     (GoclBuffer  *self,
                                                          cl_mem      *obj,
                                                          guint        flags,
                                                          gsize        size,
+                                                         gpointer     host_ptr,
                                                          GError     **error);
 
 G_DEFINE_TYPE_WITH_CODE (GoclBuffer, gocl_buffer, G_TYPE_OBJECT,
@@ -183,6 +184,7 @@ gocl_buffer_initable_init (GInitable     *initable,
                                                       &self->priv->buf,
                                                       self->priv->flags,
                                                       self->priv->size,
+                                                      self->priv->host_ptr,
                                                       error);
 }
 
@@ -280,6 +282,7 @@ create_cl_mem (GoclBuffer  *self,
                cl_mem      *obj,
                guint        flags,
                gsize        size,
+               gpointer     host_ptr,
                GError     **error)
 {
   cl_int err_code = 0;
@@ -287,7 +290,7 @@ create_cl_mem (GoclBuffer  *self,
   *obj = clCreateBuffer (context,
                          flags,
                          size,
-                         NULL,
+                         host_ptr,
                          &err_code);
   if (gocl_error_check_opencl (err_code, error))
     return FALSE;
