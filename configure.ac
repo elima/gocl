@@ -2,7 +2,7 @@
 # configure.ac
 #
 # Gocl - A GObject wrapper to OpenCL
-# Copyright (C) 2012 Igalia S.L.
+# Copyright (C) 2012-2013 Igalia S.L.
 #
 # Authors:
 #   Eduardo Lima Mitev <elima@igalia.com>
@@ -78,7 +78,6 @@ PKG_CHECK_MODULES(GLIB, gio-2.0 >= $GLIB_REQUIRED
 		        gthread-2.0 >= $GLIB_REQUIRED
 		        gobject-2.0 >= $GLIB_REQUIRED)
 
-#AC_CHECK_LIB([OpenCL], [clGetPlatformIDs])
 AC_CHECK_LIB([OpenCL], [clGetPlatformIDs])
 
 # GObject-Introspection check
@@ -93,6 +92,13 @@ if test "x$found_introspection" = "xyes"; then
    PRJ_GIR_TARGET_NAME="prj_gir_namespace"_"prj_version_major"_"prj_version_minor"_gir
    AC_SUBST(PRJ_GIR_TARGET_NAME)
 fi
+
+# If Cogl is present, build cogl examples
+enable_cogl_examples="yes"
+PKG_CHECK_MODULES([COGL], [cogl-1.0 > 1.14],,
+    [enable_cogl_examples="no"])
+
+AM_CONDITIONAL([ENABLE_COGL_EXAMPLES], [test "x$enable_cogl_examples" = "xyes"])
 
 # GTK Doc
 GTK_DOC_CHECK([1.11])
@@ -136,4 +142,5 @@ echo "    Build introspection data:   ${enable_introspection}"
 echo "     Build API documentation:   ${enable_gtk_doc}"
 echo "           Enable debug mode:   ${enable_debug}"
 echo "      Enable automated tests:   ${enable_tests}"
+echo "        Enable Cogl examples:   ${enable_cogl_examples}"
 echo ""
