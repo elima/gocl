@@ -61,6 +61,15 @@ struct _GoclBufferClass
                               gsize        size,
                               gpointer     host_ptr,
                               GError     **error);
+  cl_int   (* read_all)      (GoclBuffer          *self,
+                              cl_mem               buffer,
+                              cl_command_queue     queue,
+                              gpointer             target_ptr,
+                              gsize               *size,
+                              gboolean             blocking,
+                              cl_event            *event_wait_list,
+                              guint                event_wait_list_len,
+                              cl_event            *out_event);
 };
 
 GType                  gocl_buffer_get_type                   (void) G_GNUC_CONST;
