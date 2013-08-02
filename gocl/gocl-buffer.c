@@ -696,3 +696,69 @@ gocl_buffer_list_to_array (GList *list, guint *len)
 
   return arr;
 }
+
+/**
+ * gocl_buffer_read_all_sync:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @target_ptr: (array length=size) (element-type guint8) (allow-none): The
+ * pointer to copy the data to
+ * @size: (out) (allow-none): A pointer to retrieve the size of the buffer,
+ * or %NULL
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Reads all the data in buffer from remote context into the host memory
+ * referenced by @target_ptr. The operation is enqueued in @queue, and the
+ * program execution blocks until the read finishes.
+ *
+ * If @size is not %NULL, it will store the total size read.
+ *
+ * If @event_wait_list is provided, the read operation will
+ * start only when all the #GoclEvent in the list have triggered.
+ *
+ * Returns: %TRUE on success, %FALSE on error
+ **/
+gboolean
+gocl_buffer_read_all_sync (GoclBuffer  *self,
+                           GoclQueue   *queue,
+                           gpointer     target_ptr,
+                           gsize       *size,
+                           GList       *event_wait_list,
+                           GError     **error)
+{
+  GoclBufferClass *class;
+  cl_command_queue _queue;
+  cl_int err_code;
+  cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
+  cl_mem buffer;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
+  g_return_val_if_fail (target_ptr != NULL, FALSE);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  buffer = gocl_buffer_get_buffer (GOCL_BUFFER (self));
+
+  class = GOCL_BUFFER_GET_CLASS (self);
+  g_assert (class->read_all != NULL);
+
+  err_code = class->read_all (self,
+                              buffer,
+                              _queue,
+                              target_ptr,
+                              size,
+                              TRUE,
+                              _event_wait_list,
+                              event_wait_list_len,
+                              NULL);
+  g_free (_event_wait_list);
+
+  return ! gocl_error_check_opencl (err_code, error);
+}
