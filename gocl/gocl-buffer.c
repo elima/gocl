@@ -104,6 +104,15 @@ static gboolean       create_cl_mem                     (GoclBuffer  *self,
                                                          gsize        size,
                                                          gpointer     host_ptr,
                                                          GError     **error);
+static cl_int         read_all                          (GoclBuffer          *self,
+                                                         cl_mem               buffer,
+                                                         cl_command_queue     queue,
+                                                         gpointer             target_ptr,
+                                                         gsize               *size,
+                                                         gboolean             blocking,
+                                                         cl_event            *event_wait_list,
+                                                         guint                event_wait_list_len,
+                                                         cl_event            *out_event);
 
 G_DEFINE_TYPE_WITH_CODE (GoclBuffer, gocl_buffer, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
@@ -124,6 +133,7 @@ gocl_buffer_class_init (GoclBufferClass *class)
   obj_class->set_property = set_property;
 
   class->create_cl_mem = create_cl_mem;
+  class->read_all = read_all;
 
   g_object_class_install_property (obj_class, PROP_CONTEXT,
                                    g_param_spec_object ("context",
@@ -296,6 +306,31 @@ create_cl_mem (GoclBuffer  *self,
     return FALSE;
   else
     return TRUE;
+}
+
+static cl_int
+read_all (GoclBuffer          *self,
+          cl_mem               buffer,
+          cl_command_queue     queue,
+          gpointer             target_ptr,
+          gsize               *size,
+          gboolean             blocking,
+          cl_event            *event_wait_list,
+          guint                event_wait_list_len,
+          cl_event            *out_event)
+{
+  if (size != NULL)
+    *size = self->priv->size;
+
+  return clEnqueueReadBuffer (queue,
+                              buffer,
+                              blocking,
+                              0,
+                              self->priv->size,
+                              target_ptr,
+                              event_wait_list_len,
+                              event_wait_list,
+                              out_event);
 }
 
 /* public */
