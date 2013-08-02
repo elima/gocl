@@ -88,6 +88,15 @@ static gboolean       create_cl_mem                       (GoclBuffer  *buffer,
                                                            gsize        size,
                                                            gpointer     host_ptr,
                                                            GError     **error);
+static cl_int         read_all                            (GoclBuffer          *buffer,
+                                                           cl_mem               image,
+                                                           cl_command_queue     queue,
+                                                           gpointer             target_ptr,
+                                                           gsize               *size,
+                                                           gboolean             blocking,
+                                                           cl_event            *event_wait_list,
+                                                           guint                event_wait_list_len,
+                                                           cl_event            *out_event);
 
 G_DEFINE_TYPE (GoclImage, gocl_image, GOCL_TYPE_BUFFER)
 
@@ -106,6 +115,7 @@ gocl_image_class_init (GoclImageClass *class)
   obj_class->set_property = set_property;
 
   gocl_buf_class->create_cl_mem = create_cl_mem;
+  gocl_buf_class->read_all = read_all;
 
   g_object_class_install_property (obj_class, PROP_TYPE,
                                    g_param_spec_uint ("type",
@@ -279,7 +289,6 @@ get_image_info (GoclImage *self, cl_mem obj, cl_image_info param)
     default:
       break;
     }
-
 }
 
 static gboolean
@@ -330,6 +339,43 @@ create_cl_mem (GoclBuffer  *buffer,
     return FALSE;
   else
     return TRUE;
+}
+
+static cl_int
+read_all (GoclBuffer          *buffer,
+          cl_mem               image,
+          cl_command_queue     queue,
+          gpointer             target_ptr,
+          gsize               *size,
+          gboolean             blocking,
+          cl_event            *event_wait_list,
+          guint                event_wait_list_len,
+          cl_event            *out_event)
+{
+  GoclImage *self = GOCL_IMAGE (buffer);
+
+  gsize origin[3] = {0, };
+  gsize region[3];
+
+  region[0] = self->priv->props.image_width;
+  region[1] = self->priv->props.image_height;
+  region[2] = self->priv->props.image_type == GOCL_IMAGE_TYPE_2D ?
+    1 : self->priv->props.image_depth;
+
+  if (size != NULL)
+    *size = region[0] * region[1] * region[2] * 4 /* assuming RGBA */;
+
+  return clEnqueueReadImage (queue,
+                             image,
+                             blocking,
+                             origin,
+                             region,
+                             0,
+                             0,
+                             target_ptr,
+                             event_wait_list_len,
+                             event_wait_list,
+                             out_event);
 }
 
 /* public */
