@@ -81,13 +81,12 @@ static void           get_property                        (GObject    *obj,
                                                            GValue     *value,
                                                            GParamSpec *pspec);
 
-static gboolean       create_cl_mem                       (GoclBuffer  *buffer,
+static cl_int         create_cl_mem                       (GoclBuffer  *buffer,
                                                            cl_context   context,
                                                            cl_mem      *obj,
                                                            guint        flags,
                                                            gsize        size,
-                                                           gpointer     host_ptr,
-                                                           GError     **error);
+                                                           gpointer     host_ptr);
 static cl_int         read_all                            (GoclBuffer          *buffer,
                                                            cl_mem               image,
                                                            cl_command_queue     queue,
@@ -291,14 +290,13 @@ get_image_info (GoclImage *self, cl_mem obj, cl_image_info param)
     }
 }
 
-static gboolean
+static cl_int
 create_cl_mem (GoclBuffer  *buffer,
                cl_context   context,
                cl_mem      *obj,
                guint        flags,
                gsize        size,
-               gpointer     host_ptr,
-               GError     **error)
+               gpointer     host_ptr)
 {
   GoclImage *self = GOCL_IMAGE (buffer);
   cl_int err_code = 0;
@@ -335,10 +333,7 @@ create_cl_mem (GoclBuffer  *buffer,
                             &err_code);
     }
 
-  if (gocl_error_check_opencl (err_code, error))
-    return FALSE;
-  else
-    return TRUE;
+  return err_code;
 }
 
 static cl_int

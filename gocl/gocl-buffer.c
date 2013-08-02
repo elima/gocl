@@ -97,13 +97,12 @@ static void           get_property                      (GObject    *obj,
                                                          GValue     *value,
                                                          GParamSpec *pspec);
 
-static gboolean       create_cl_mem                     (GoclBuffer  *self,
+static cl_int         create_cl_mem                     (GoclBuffer  *self,
                                                          cl_context   context,
                                                          cl_mem      *obj,
                                                          guint        flags,
                                                          gsize        size,
-                                                         gpointer     host_ptr,
-                                                         GError     **error);
+                                                         gpointer     host_ptr);
 static cl_int         read_all                          (GoclBuffer          *self,
                                                          cl_mem               buffer,
                                                          cl_command_queue     queue,
@@ -186,16 +185,17 @@ gocl_buffer_initable_init (GInitable     *initable,
 {
   GoclBuffer *self = GOCL_BUFFER (initable);
   cl_context ctx;
+  cl_int err_code;
 
   ctx = gocl_context_get_context (self->priv->context);
 
-  return GOCL_BUFFER_GET_CLASS (self)->create_cl_mem (self,
-                                                      ctx,
-                                                      &self->priv->buf,
-                                                      self->priv->flags,
-                                                      self->priv->size,
-                                                      self->priv->host_ptr,
-                                                      error);
+  err_code = GOCL_BUFFER_GET_CLASS (self)->create_cl_mem (self,
+                                                          ctx,
+                                                          &self->priv->buf,
+                                                          self->priv->flags,
+                                                          self->priv->size,
+                                                          self->priv->host_ptr);
+  return ! gocl_error_check_opencl (err_code, error);
 }
 
 static void
@@ -286,26 +286,23 @@ get_property (GObject    *obj,
     }
 }
 
-static gboolean
+static cl_int
 create_cl_mem (GoclBuffer  *self,
                cl_context   context,
                cl_mem      *obj,
                guint        flags,
                gsize        size,
-               gpointer     host_ptr,
-               GError     **error)
+               gpointer     host_ptr)
 {
-  cl_int err_code = 0;
+  cl_int err_code;
 
   *obj = clCreateBuffer (context,
                          flags,
                          size,
                          host_ptr,
                          &err_code);
-  if (gocl_error_check_opencl (err_code, error))
-    return FALSE;
-  else
-    return TRUE;
+
+  return err_code;
 }
 
 static cl_int
