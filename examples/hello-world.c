@@ -105,11 +105,11 @@ on_program_built (GObject      *obj,
   data_size = sizeof (*data) * WIDTH * HEIGHT;
   data = g_slice_alloc0 (data_size);
 
-  buffer = gocl_context_create_buffer (context,
-                                       GOCL_BUFFER_FLAGS_READ_WRITE,
-                                       data_size,
-                                       NULL,
-                                       &error);
+  buffer = gocl_buffer_new (context,
+                            GOCL_BUFFER_FLAGS_READ_WRITE,
+                            data_size,
+                            NULL,
+                            &error);
   if (buffer == NULL)
     {
       g_print ("Failed to create buffer: %s\n", error->message);

@@ -285,12 +285,12 @@ main (gint argc, gchar *argv[])
   GoclBuffer *mask_buf;
   mask = create_blur_mask (BLUR_FACTOR, (gint32 *) &mask_size);
   mask_alloc_size = sizeof (gfloat) * (mask_size * 2 + 1) * (mask_size * 2 + 1);
-  mask_buf = gocl_context_create_buffer (gocl_data.context,
-                                         GOCL_BUFFER_FLAGS_READ_ONLY |
-                                         GOCL_BUFFER_FLAGS_USE_HOST_PTR,
-                                         mask_alloc_size,
-                                         mask,
-                                         &err);
+  mask_buf = gocl_buffer_new (gocl_data.context,
+                              GOCL_BUFFER_FLAGS_READ_ONLY |
+                              GOCL_BUFFER_FLAGS_USE_HOST_PTR,
+                              mask_alloc_size,
+                              mask,
+                              &err);
   g_assert_no_error (err);
 
   /* set kernel arguments */
