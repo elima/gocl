@@ -32,4 +32,16 @@ hello_world_sync_CFLAGS = $(AM_CFLAGS)
 hello_world_sync_LDADD = $(AM_LIBS)
 hello_world_sync_SOURCES = hello-world-sync.c
 
+if ENABLE_COGL_EXAMPLES
+
+noinst_PROGRAMS += \
+	gaussian-blur
+
+# gaussian-blur
+gaussian_blur_CFLAGS = $(AM_CFLAGS) $(COGL_CFLAGS)
+gaussian_blur_LDADD = $(AM_LIBS) $(COGL_LIBS) -lGL
+gaussian_blur_SOURCES = gaussian-blur.c
+
+endif
+
 EXTRA_DIST =
