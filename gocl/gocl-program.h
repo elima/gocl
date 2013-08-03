@@ -58,23 +58,19 @@ GType                  gocl_program_get_type                   (void) G_GNUC_CON
 
 GoclProgram *          gocl_program_new                        (GoclContext  *context,
                                                                 const gchar **sources,
-                                                                guint         num_sources,
-                                                                GError      **error);
-GoclProgram *          gocl_program_new_from_file_sync         (GoclContext  *context,
-                                                                const gchar  *filename,
-                                                                GError      **error);
+                                                                guint         num_sources);
+GoclProgram *          gocl_program_new_from_file_sync         (GoclContext *context,
+                                                                const gchar *filename);
 
 cl_program             gocl_program_get_program                (GoclProgram *self);
 
 GoclContext *          gocl_program_get_context                (GoclProgram *self);
 
-GoclKernel *           gocl_program_get_kernel                 (GoclProgram  *self,
-                                                                const gchar  *kernel_name,
-                                                                GError      **error);
+GoclKernel *           gocl_program_get_kernel                 (GoclProgram *self,
+                                                                const gchar *kernel_name);
 
-gboolean               gocl_program_build_sync                 (GoclProgram  *self,
-                                                                const gchar  *options,
-                                                                GError      **error);
+gboolean               gocl_program_build_sync                 (GoclProgram *self,
+                                                                const gchar *options);
 void                   gocl_program_build                      (GoclProgram         *self,
                                                                 const gchar         *options,
                                                                 GCancellable        *cancellable,

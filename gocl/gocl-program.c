@@ -56,6 +56,7 @@
 #include "gocl-program.h"
 
 #include "gocl-error.h"
+#include "gocl-error-private.h"
 
 struct _GoclProgramPrivate
 {
@@ -194,15 +195,15 @@ build_in_thread (GSimpleAsyncResult *res,
                  GCancellable       *cancellable)
 {
   GoclProgram *self = GOCL_PROGRAM (object);
-  GError *error = NULL;
   gchar *options;
 
   options = g_simple_async_result_get_op_res_gpointer (res);
 
-  if (! gocl_program_build_sync (self,
-                                 options,
-                                 &error))
+  if (! gocl_program_build_sync (self, options))
     {
+      GError *error;
+
+      error = gocl_error_get_last ();
       g_simple_async_result_take_error (res, error);
     }
 
@@ -219,24 +220,24 @@ build_in_thread (GSimpleAsyncResult *res,
  * @sources: (array length=num_sources) (type utf8): Array of source code
  * null-terminated strings
  * @num_sources: The number of elements in @sources
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
- * Creates and returns a new #GoclProgram. Upon error, %NULL is returned and
- * @error is filled accordingly.
+ * Creates and returns a new #GoclProgram. Upon error, %NULL is returned.
  *
  * Returns: (transfer full): A newly created #GoclProgram
  **/
 GoclProgram *
 gocl_program_new (GoclContext  *context,
                   const gchar **sources,
-                  guint         num_sources,
-                  GError      **error)
+                  guint         num_sources)
 {
   GoclProgram *self;
   cl_int err_code;
+  GError **error;
 
   g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (sources != NULL, NULL);
+
+  error = gocl_error_prepare ();
 
   self = g_object_new (GOCL_TYPE_PROGRAM,
                        "context", context,
@@ -245,11 +246,12 @@ gocl_program_new (GoclContext  *context,
   if (num_sources < 1)
     num_sources = g_strv_length ((gchar **) sources);
 
-  self->priv->program = clCreateProgramWithSource (gocl_context_get_context (context),
-                                                   num_sources,
-                                                   sources,
-                                                   NULL,
-                                                   &err_code);
+  self->priv->program =
+    clCreateProgramWithSource (gocl_context_get_context (context),
+                               num_sources,
+                               sources,
+                               NULL,
+                               &err_code);
   if (gocl_error_check_opencl (err_code, error))
     return NULL;
 
@@ -260,23 +262,23 @@ gocl_program_new (GoclContext  *context,
  * gocl_program_new_from_file_sync:
  * @context: The #GoclContext
  * @filename: The source code file
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Creates and returns a new #GoclProgram. This is a convenient constructor for
  * cases when there is only one file containing the source code. Upon error,
- * %NULL is returned and @error is filled accordingly.
+ * %NULL is returned.
  *
  * Returns: (transfer full): A newly created #GoclProgram, or %NULL on error
  **/
 GoclProgram *
-gocl_program_new_from_file_sync (GoclContext  *context,
-                                 const gchar  *filename,
-                                 GError      **error)
+gocl_program_new_from_file_sync (GoclContext *context, const gchar *filename)
 {
   gchar *source;
   GoclProgram *self;
+  GError **error;
 
   g_return_val_if_fail (filename != NULL, NULL);
+
+  error = gocl_error_prepare ();
 
   if (! g_file_get_contents (filename,
                              &source,
@@ -286,10 +288,7 @@ gocl_program_new_from_file_sync (GoclContext  *context,
       return NULL;
     }
 
-  self = gocl_program_new (context,
-                           (const gchar **) &source,
-                           1,
-                           error);
+  self = gocl_program_new (context, (const gchar **) &source, 1);
   g_free (source);
 
   return self;
@@ -333,22 +332,22 @@ gocl_program_get_context (GoclProgram *self)
  * gocl_program_get_kernel:
  * @self: The #GoclProgram
  * @kernel_name: A string representing the name of a kernel function
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Creates and retrieves a new #GoclKernel object from a kernel function
  * in the source code, specified by @kernel_name string. Upon success,
- * a new #GoclKernel is returned, otherwise %NULL is returned and @error
- * is filled accordingly.
+ * a new #GoclKernel is returned, otherwise %NULL is returned.
  *
  * Returns: (transfer full): A newly created #GoclKernel object
  **/
 GoclKernel *
-gocl_program_get_kernel (GoclProgram  *self,
-                         const gchar  *kernel_name,
-                         GError      **error)
+gocl_program_get_kernel (GoclProgram *self, const gchar *kernel_name)
 {
+  GError **error;
+
   g_return_val_if_fail (GOCL_IS_PROGRAM (self), NULL);
   g_return_val_if_fail (kernel_name != NULL, NULL);
+
+  error = gocl_error_prepare ();
 
   return GOCL_KERNEL (g_initable_new (GOCL_TYPE_KERNEL,
                                       NULL,
@@ -362,12 +361,10 @@ gocl_program_get_kernel (GoclProgram  *self,
  * gocl_program_build_sync:
  * @self: The #GoclProgram
  * @options: A string specifying OpenCL program build options
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Builds the program using the build options specified in
  * @options. This method is blocking. For an asynchronous version,
- * gocl_program_build() is provided. On error, %FALSE is returned and
- * @error is filled accordingly.
+ * gocl_program_build() is provided. On error, %FALSE is returned.
  *
  * A detailed description of the build options is available at Kronos
  * documentation website:
@@ -376,13 +373,14 @@ gocl_program_get_kernel (GoclProgram  *self,
  * Returns: %TRUE on success or %FALSE on error
  **/
 gboolean
-gocl_program_build_sync (GoclProgram  *self,
-                         const gchar  *options,
-                         GError      **error)
+gocl_program_build_sync (GoclProgram *self, const gchar *options)
 {
   cl_int err_code;
+  GError **error;
 
   g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
+
+  error = gocl_error_prepare ();
 
   err_code = clBuildProgram (self->priv->program,
                              0,
