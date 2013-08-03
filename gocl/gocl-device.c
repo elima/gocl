@@ -267,11 +267,8 @@ gsize
 gocl_device_get_max_work_group_size (GoclDevice *self)
 {
   cl_int err_code;
-  GError **error;
 
   g_return_val_if_fail (GOCL_IS_DEVICE (self), 0);
-
-  error = gocl_error_prepare ();
 
   if (self->priv->max_work_group_size > 0)
     return self->priv->max_work_group_size;
@@ -281,7 +278,7 @@ gocl_device_get_max_work_group_size (GoclDevice *self)
                               sizeof (gsize),
                               &self->priv->max_work_group_size,
                               NULL);
-  if (gocl_error_check_opencl (err_code, error))
+  if (gocl_error_check_opencl_internal (err_code))
     return 0;
 
   return self->priv->max_work_group_size;
@@ -420,7 +417,6 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
                                      GList       *event_wait_list)
 {
   cl_int err_code;
-  GError **error;
   cl_event event;
   GoclQueue *queue;
   cl_command_queue _queue;
@@ -432,8 +428,6 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
   guint object_list_len;
 
   g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
-
-  error = gocl_error_prepare ();
 
   if (object_list == NULL)
     return TRUE;
@@ -458,7 +452,7 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
   g_free (_event_wait_list);
   g_free (_object_list);
 
-  if (gocl_error_check_opencl (err_code, error))
+  if (gocl_error_check_opencl_internal (err_code))
     return FALSE;
 
   clWaitForEvents (1, &event);
@@ -489,7 +483,6 @@ gocl_device_release_gl_objects_sync (GoclDevice  *self,
                                      GList       *event_wait_list)
 {
   cl_int err_code;
-  GError **error;
   cl_event event;
   GoclQueue *queue;
   cl_command_queue _queue;
@@ -501,8 +494,6 @@ gocl_device_release_gl_objects_sync (GoclDevice  *self,
   guint object_list_len;
 
   g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
-
-  error = gocl_error_prepare ();
 
   if (object_list == NULL)
     return TRUE;
@@ -527,7 +518,7 @@ gocl_device_release_gl_objects_sync (GoclDevice  *self,
   g_free (_event_wait_list);
   g_free (_object_list);
 
-  if (gocl_error_check_opencl (err_code, error))
+  if (gocl_error_check_opencl_internal (err_code))
     return FALSE;
 
   clWaitForEvents (1, &event);
