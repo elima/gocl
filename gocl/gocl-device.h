@@ -57,11 +57,9 @@ GType                  gocl_device_get_type                   (void) G_GNUC_CONS
 
 cl_device_id           gocl_device_get_id                     (GoclDevice *self);
 
-gsize                  gocl_device_get_max_work_group_size    (GoclDevice  *self,
-                                                               GError     **error);
+gsize                  gocl_device_get_max_work_group_size    (GoclDevice  *self);
 
-GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self,
-                                                               GError     **error);
+GoclQueue *            gocl_device_get_default_queue          (GoclDevice  *self);
 
 gboolean               gocl_device_has_extension              (GoclDevice   *self,
                                                                const gchar  *extension_name);
@@ -70,12 +68,10 @@ guint                  gocl_device_get_max_compute_units      (GoclDevice *self)
 
 gboolean               gocl_device_acquire_gl_objects_sync    (GoclDevice  *self,
                                                                GList       *object_list,
-                                                               GList       *event_wait_list,
-                                                               GError     **error);
+                                                               GList       *event_wait_list);
 gboolean               gocl_device_release_gl_objects_sync    (GoclDevice  *self,
                                                                GList       *object_list,
-                                                               GList       *event_wait_list,
-                                                               GError     **error);
+                                                               GList       *event_wait_list);
 
 /* GoclQueue headers */
 GoclDevice *           gocl_queue_get_device                  (GoclQueue *self);

@@ -48,7 +48,7 @@
 
 #include "gocl-device.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
 
@@ -254,22 +254,24 @@ gocl_device_get_context (GoclDevice *device)
 /**
  * gocl_device_get_max_work_group_size:
  * @self: The #GoclDevice
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Retrieves the maximum work group size for the device,
  * by querying the @CL_DEVICE_MAX_WORK_GROUP_SIZE info key through
  * clGetDeviceInfo().
  * Upon success a value greater than zero is returned, otherwise zero
- * is returned and @error is filled with an error from OpenCL domain.
+ * is returned.
  *
  * Returns: The maximum size of the work group for this device.
  **/
 gsize
-gocl_device_get_max_work_group_size (GoclDevice *self, GError **error)
+gocl_device_get_max_work_group_size (GoclDevice *self)
 {
   cl_int err_code;
+  GError **error;
 
   g_return_val_if_fail (GOCL_IS_DEVICE (self), 0);
+
+  error = gocl_error_prepare ();
 
   if (self->priv->max_work_group_size > 0)
     return self->priv->max_work_group_size;
@@ -288,20 +290,23 @@ gocl_device_get_max_work_group_size (GoclDevice *self, GError **error)
 /**
  * gocl_device_get_default_queue:
  * @self: The #GoclDevice
- * @error: (out) (allow-none) (transfer full): A pointer to a #GError, or %NULL
  *
  * Returns a #GoclQueue command queue associated with this device, or %NULL upon
- * error, in which case @error is filled accordingly.
+ * error.
  *
  * Returns: (transfer none): A #GoclQueue object, which is owned by the device
  *   and should not be freed.
  **/
 GoclQueue *
-gocl_device_get_default_queue (GoclDevice *self, GError **error)
+gocl_device_get_default_queue (GoclDevice *self)
 {
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), NULL);
+
   if (self->priv->queue == NULL)
     {
+      GError **error;
 
+      error = gocl_error_prepare ();
       self->priv->queue = g_initable_new (GOCL_TYPE_QUEUE,
                                           NULL,
                                           error,
@@ -397,7 +402,6 @@ gocl_device_get_max_compute_units (GoclDevice *self)
  * #GoclBuffer objects, or %NULL
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
  * objects to wait for, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Enqueues a request for acquiring the #GoclBuffer (or deriving) objects
  * contained in @object_list, which were created from OpenGL objects, blocking
@@ -406,18 +410,17 @@ gocl_device_get_max_compute_units (GoclDevice *self)
  * This method works only if the <i>cl_khr_gl_sharing</i> OpenCL extension is
  * supported.
  *
- * Upon success, %TRUE is returned, otherwise %FALSE is returned and @error is
- * filled accordingly.
+ * Upon success, %TRUE is returned, otherwise %FALSE is returned.
  *
  * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
                                      GList       *object_list,
-                                     GList       *event_wait_list,
-                                     GError     **error)
+                                     GList       *event_wait_list)
 {
   cl_int err_code;
+  GError **error;
   cl_event event;
   GoclQueue *queue;
   cl_command_queue _queue;
@@ -430,10 +433,12 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
 
   g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
 
+  error = gocl_error_prepare ();
+
   if (object_list == NULL)
     return TRUE;
 
-  queue = gocl_device_get_default_queue (self, error);
+  queue = gocl_device_get_default_queue (self);
   if (queue == NULL)
     return FALSE;
 
@@ -469,24 +474,22 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
  * #GoclBuffer objects, or %NULL
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
  * objects to wait for, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Enqueues a request for releasing the #GoclBuffer (or deriving) objects
  * contained in @object_list, which were previously acquired by a call to
  * gocl_device_acquire_gl_objects_sync().
  *
- * Upon success, %TRUE is returned, otherwise %FALSE is returned and @error is
- * filled accordingly.
+ * Upon success, %TRUE is returned, otherwise %FALSE is returned.
  *
  * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
 gocl_device_release_gl_objects_sync (GoclDevice  *self,
                                      GList       *object_list,
-                                     GList       *event_wait_list,
-                                     GError     **error)
+                                     GList       *event_wait_list)
 {
   cl_int err_code;
+  GError **error;
   cl_event event;
   GoclQueue *queue;
   cl_command_queue _queue;
@@ -499,10 +502,12 @@ gocl_device_release_gl_objects_sync (GoclDevice  *self,
 
   g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
 
+  error = gocl_error_prepare ();
+
   if (object_list == NULL)
     return TRUE;
 
-  queue = gocl_device_get_default_queue (self, error);
+  queue = gocl_device_get_default_queue (self);
   if (queue == NULL)
     return FALSE;
 

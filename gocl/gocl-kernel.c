@@ -408,7 +408,7 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
   g_return_val_if_fail (GOCL_IS_KERNEL (self), FALSE);
   g_return_val_if_fail (GOCL_IS_DEVICE (device), FALSE);
 
-  queue = gocl_device_get_default_queue (device, error);
+  queue = gocl_device_get_default_queue (device);
   if (queue == NULL)
     return FALSE;
 
@@ -480,7 +480,7 @@ gocl_kernel_run_in_device (GoclKernel *self,
   _event_wait_list = gocl_event_list_to_array (event_wait_list,
                                                &event_wait_list_len);
 
-  queue = gocl_device_get_default_queue (device, &error);
+  queue = gocl_device_get_default_queue (device);
   if (queue == NULL)
     goto out;
 
