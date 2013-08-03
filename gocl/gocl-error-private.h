@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 
 gboolean              gocl_error_check_opencl              (cl_int    err_code,
                                                             GError  **error);
+gboolean              gocl_error_check_opencl_internal     (cl_int err_code);
 
 GError **             gocl_error_prepare                   (void);
 void                  gocl_error_free                      (void);

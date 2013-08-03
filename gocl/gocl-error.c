@@ -117,6 +117,25 @@ gocl_error_check_opencl (cl_int err_code, GError **error)
     }
 }
 
+gboolean
+gocl_error_check_opencl_internal (cl_int err_code)
+{
+  g_clear_error (&last_error);
+
+  if (err_code != CL_SUCCESS)
+    {
+      g_set_error (&last_error,
+                   GOCL_OPENCL_ERROR,
+                   err_code,
+                   get_error_code_description (err_code));
+      return TRUE;
+    }
+  else
+    {
+      return FALSE;
+    }
+}
+
 /**
  * gocl_error_prepare:
  *
