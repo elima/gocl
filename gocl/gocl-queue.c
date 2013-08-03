@@ -46,7 +46,7 @@
 
 #include "gocl-queue.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
 
