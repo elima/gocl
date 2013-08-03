@@ -56,7 +56,7 @@
 
 #include "gocl-buffer.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
 
@@ -338,7 +338,6 @@ read_all (GoclBuffer          *self,
  * @flags: An OR'ed combination of values from #GoclBufferFlags
  * @size: The size of the buffer, in bytes
  * @host_ptr: (allow-none) (type guint64): A pointer to memory in the host system, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Creates a new buffer on context's memory. Depending on flags, the @host_ptr pointer can be
  * used to initialize the contents of the buffer from a block of memory in the host.
@@ -349,10 +348,13 @@ GoclBuffer *
 gocl_buffer_new (GoclContext  *context,
                  guint         flags,
                  gsize         size,
-                 gpointer      host_ptr,
-                 GError      **error)
+                 gpointer      host_ptr)
 {
+  GError **error;
+
   g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
+
+  error = gocl_error_prepare ();
 
   return g_initable_new (GOCL_TYPE_BUFFER,
                          NULL,
@@ -494,7 +496,6 @@ gocl_buffer_read (GoclBuffer *self,
  * @offset: The offset to start reading from
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
  * object to wait for, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Reads a block of data of @size bytes from remote context into host memory,
  * starting at @offset. The operation is actually enqueued in @queue, and
@@ -505,13 +506,12 @@ gocl_buffer_read (GoclBuffer *self,
  * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
-gocl_buffer_read_sync (GoclBuffer  *self,
-                       GoclQueue   *queue,
-                       gpointer     target_ptr,
-                       gsize        size,
-                       goffset      offset,
-                       GList       *event_wait_list,
-                       GError     **error)
+gocl_buffer_read_sync (GoclBuffer *self,
+                       GoclQueue  *queue,
+                       gpointer    target_ptr,
+                       gsize       size,
+                       goffset     offset,
+                       GList      *event_wait_list)
 {
   cl_command_queue _queue;
   cl_int err_code;
@@ -536,7 +536,7 @@ gocl_buffer_read_sync (GoclBuffer  *self,
 
   g_free (_event_wait_list);
 
-  return ! gocl_error_check_opencl (err_code, error);
+  return ! gocl_error_check_opencl_internal (err_code);
 }
 
 /**
@@ -634,7 +634,6 @@ gocl_buffer_write (GoclBuffer     *self,
  * @offset: The offset to start writing data to
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
  * object to wait for, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Writes a block of data of @size bytes from host memory into remote context
  * memory, starting at @offset. The operation is actually enqueued in @queue, and
@@ -645,13 +644,12 @@ gocl_buffer_write (GoclBuffer     *self,
  * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
-gocl_buffer_write_sync (GoclBuffer      *self,
-                        GoclQueue       *queue,
-                        const gpointer   data,
-                        gsize            size,
-                        goffset          offset,
-                        GList           *event_wait_list,
-                        GError         **error)
+gocl_buffer_write_sync (GoclBuffer     *self,
+                        GoclQueue      *queue,
+                        const gpointer  data,
+                        gsize           size,
+                        goffset         offset,
+                        GList          *event_wait_list)
 {
   cl_command_queue _queue;
   cl_int err_code;
@@ -676,7 +674,7 @@ gocl_buffer_write_sync (GoclBuffer      *self,
 
   g_free (_event_wait_list);
 
-  return ! gocl_error_check_opencl (err_code, error);
+  return ! gocl_error_check_opencl_internal (err_code);
 }
 
 /**
@@ -736,7 +734,6 @@ gocl_buffer_list_to_array (GList *list, guint *len)
  * or %NULL
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
  * object to wait for, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Reads all the data in buffer from remote context into the host memory
  * referenced by @target_ptr. The operation is enqueued in @queue, and the
@@ -750,12 +747,11 @@ gocl_buffer_list_to_array (GList *list, guint *len)
  * Returns: %TRUE on success, %FALSE on error
  **/
 gboolean
-gocl_buffer_read_all_sync (GoclBuffer  *self,
-                           GoclQueue   *queue,
-                           gpointer     target_ptr,
-                           gsize       *size,
-                           GList       *event_wait_list,
-                           GError     **error)
+gocl_buffer_read_all_sync (GoclBuffer *self,
+                           GoclQueue  *queue,
+                           gpointer    target_ptr,
+                           gsize      *size,
+                           GList      *event_wait_list)
 {
   GoclBufferClass *class;
   cl_command_queue _queue;
@@ -789,5 +785,5 @@ gocl_buffer_read_all_sync (GoclBuffer  *self,
                               NULL);
   g_free (_event_wait_list);
 
-  return ! gocl_error_check_opencl (err_code, error);
+  return ! gocl_error_check_opencl_internal (err_code);
 }

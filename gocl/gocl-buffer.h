@@ -86,8 +86,7 @@ gboolean               gocl_buffer_read_sync                  (GoclBuffer  *self
                                                                gpointer     target_ptr,
                                                                gsize        size,
                                                                goffset      offset,
-                                                               GList       *event_wait_list,
-                                                               GError     **error);
+                                                               GList       *event_wait_list);
 GoclEvent *            gocl_buffer_write                      (GoclBuffer     *self,
                                                                GoclQueue      *queue,
                                                                const gpointer  data,
@@ -99,15 +98,13 @@ gboolean               gocl_buffer_write_sync                 (GoclBuffer      *
                                                                const gpointer   data,
                                                                gsize            size,
                                                                goffset          offset,
-                                                               GList           *event_wait_list,
-                                                               GError         **error);
+                                                               GList           *event_wait_list);
 
 gboolean               gocl_buffer_read_all_sync              (GoclBuffer  *self,
                                                                GoclQueue   *queue,
                                                                gpointer     target_ptr,
                                                                gsize       *size,
-                                                               GList       *event_wait_list,
-                                                               GError     **error);
+                                                               GList       *event_wait_list);
 
 cl_mem *               gocl_buffer_list_to_array              (GList *list,
                                                                guint *len);
