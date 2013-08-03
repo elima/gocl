@@ -333,6 +333,38 @@ read_all (GoclBuffer          *self,
 /* public */
 
 /**
+ * gocl_buffer_new:
+ * @context: A #GoclContext to attach the buffer to
+ * @flags: An OR'ed combination of values from #GoclBufferFlags
+ * @size: The size of the buffer, in bytes
+ * @host_ptr: (allow-none) (type guint64): A pointer to memory in the host system, or %NULL
+ * @error: (out) (allow-none): A pointer to a #GError, or %NULL
+ *
+ * Creates a new buffer on context's memory. Depending on flags, the @host_ptr pointer can be
+ * used to initialize the contents of the buffer from a block of memory in the host.
+ *
+ * Returns: (transfer full): A newly created #GoclBuffer, or %NULL on error
+ **/
+GoclBuffer *
+gocl_buffer_new (GoclContext  *context,
+                 guint         flags,
+                 gsize         size,
+                 gpointer      host_ptr,
+                 GError      **error)
+{
+  g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
+
+  return g_initable_new (GOCL_TYPE_BUFFER,
+                         NULL,
+                         error,
+                         "context", context,
+                         "flags", flags,
+                         "size", size,
+                         "host-ptr", host_ptr,
+                         NULL);
+}
+
+/**
  * gocl_buffer_get_buffer:
  * @self: The #GoclBuffer
  *

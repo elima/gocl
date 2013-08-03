@@ -73,16 +73,15 @@ guint                  gocl_context_get_num_devices            (GoclContext *sel
 GoclDevice *           gocl_context_get_device_by_index        (GoclContext *self,
                                                                 guint        device_index);
 
-GoclBuffer *           gocl_context_create_buffer              (GoclContext  *self,
-                                                                guint         flags,
-                                                                gsize         size,
-                                                                gpointer      host_ptr,
-                                                                GError      **error);
-
 /* GoclDevice headers */
 GoclContext *          gocl_device_get_context                 (GoclDevice *device);
 
 /* GoclBuffer headers */
+GoclBuffer *           gocl_buffer_new                         (GoclContext  *context,
+                                                                guint         flags,
+                                                                gsize         size,
+                                                                gpointer      host_ptr,
+                                                                GError      **error);
 GoclContext *          gocl_buffer_get_context                 (GoclBuffer *buffer);
 
 /* GoclImage headers */

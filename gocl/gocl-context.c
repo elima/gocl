@@ -461,39 +461,3 @@ gocl_context_get_device_by_index (GoclContext *self, guint device_index)
 
   return device;
 }
-
-/**
- * gocl_context_create_buffer:
- * @self: The #GoclContext
- * @flags: An OR'ed combination of values from #GoclBufferFlags
- * @size: The size of the buffer, in bytes
- * @host_ptr: (allow-none) (type guint64): A pointer to memory in the host system, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
- *
- * Creates a new buffer on context's memory. Depending on flags, the @host_ptr pointer can be
- * used to initialize the contents of the buffer from a block of memory in the host.
- *
- * Returns: (transfer full): A newly created #GoclBuffer, or %NULL on error
- **/
-GoclBuffer *
-gocl_context_create_buffer (GoclContext  *self,
-                            guint         flags,
-                            gsize         size,
-                            gpointer      host_ptr,
-                            GError      **error)
-{
-  GoclBuffer *buffer;
-
-  g_return_val_if_fail (GOCL_IS_CONTEXT (self), NULL);
-
-  buffer = g_initable_new (GOCL_TYPE_BUFFER,
-                           NULL,
-                           error,
-                           "context", self,
-                           "flags", flags,
-                           "size", size,
-                           "host-ptr", host_ptr,
-                           NULL);
-
-  return buffer;
-}
