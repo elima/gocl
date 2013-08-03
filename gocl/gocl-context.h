@@ -83,18 +83,16 @@ GoclBuffer *           gocl_buffer_new                         (GoclContext  *co
 GoclContext *          gocl_buffer_get_context                 (GoclBuffer *buffer);
 
 /* GoclImage headers */
-GoclImage *            gocl_image_new                          (GoclContext    *context,
-                                                                guint           flags,
-                                                                gpointer        host_ptr,
-                                                                GoclImageType   type,
-                                                                gsize           width,
-                                                                gsize           height,
-                                                                gsize           depth,
-                                                                GError        **error);
-GoclImage *            gocl_image_new_from_gl_texture          (GoclContext  *context,
-                                                                guint         flags,
-                                                                guint         texture,
-                                                                GError      **error);
+GoclImage *            gocl_image_new                          (GoclContext   *context,
+                                                                guint          flags,
+                                                                gpointer       host_ptr,
+                                                                GoclImageType  type,
+                                                                gsize          width,
+                                                                gsize          height,
+                                                                gsize          depth);
+GoclImage *            gocl_image_new_from_gl_texture          (GoclContext *context,
+                                                                guint        flags,
+                                                                guint        texture);
 
 G_END_DECLS
 

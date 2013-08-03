@@ -48,7 +48,7 @@
 
 #include "gocl-image.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-context.h"
 
 struct _GoclImagePrivate
@@ -383,7 +383,6 @@ read_all (GoclBuffer          *buffer,
  * @width: Image width in pixels
  * @height: Image height in pixels, zero if image type is 1D
  * @depth: Image depth in pixels, or zero if image is not 3D
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Creates a new image buffer. Currently only 8-bits unsigned integer format is
  * supported, with RGBA channels.
@@ -393,16 +392,19 @@ read_all (GoclBuffer          *buffer,
  * Returns: (transfer full): A newly created #GoclImage, or %NULL on error
  **/
 GoclImage *
-gocl_image_new (GoclContext    *context,
-                guint           flags,
-                gpointer        host_ptr,
-                GoclImageType   type,
-                gsize           width,
-                gsize           height,
-                gsize           depth,
-                GError        **error)
+gocl_image_new (GoclContext   *context,
+                guint          flags,
+                gpointer       host_ptr,
+                GoclImageType  type,
+                gsize          width,
+                gsize          height,
+                gsize          depth)
 {
+  GError **error;
+
   g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
+
+  error = gocl_error_prepare ();
 
   return g_initable_new (GOCL_TYPE_IMAGE,
                          NULL,
@@ -422,7 +424,6 @@ gocl_image_new (GoclContext    *context,
  * @context: The #GoclContext to create the image in
  * @flags: An OR'ed combination of values from #GoclBufferFlags
  * @texture: The GL texture handle
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Creates a new image buffer from a GL texture handle. This only works if the
  * OpenCL platform supports the <i>cl_khr_gl_sharing</i> extension, and the
@@ -432,13 +433,16 @@ gocl_image_new (GoclContext    *context,
  * Returns: (transfer full): A newly created #GoclImage, or %NULL on error
  **/
 GoclImage *
-gocl_image_new_from_gl_texture (GoclContext  *context,
-                                guint         flags,
-                                guint         texture,
-                                GError      **error)
+gocl_image_new_from_gl_texture (GoclContext *context,
+                                guint        flags,
+                                guint        texture)
 {
+  GError **error;
+
   g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (texture > 0, NULL);
+
+  error = gocl_error_prepare ();
 
   return g_initable_new (GOCL_TYPE_IMAGE,
                          NULL,
