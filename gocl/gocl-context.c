@@ -61,7 +61,7 @@
 
 #include "gocl-context.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-decls.h"
 
 #define MAX_PLATFORMS 8
@@ -308,17 +308,20 @@ get_property (GObject    *obj,
 /**
  * gocl_context_new_sync:
  * @device_type: A value from #GoclDeviceType
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Attempts to create a #GoclContext of the type specified in @device_type.
- * Upon error, %NULL is returned and @error is filled accordingly. On success,
- * a new #GoclContext object is returned.
+ * Upon error, %NULL is returned. On success, a new #GoclContext object is
+ * returned.
  *
  * Returns: (transfer full): A newly created #GoclContext
  **/
 GoclContext *
-gocl_context_new_sync (GoclDeviceType device_type, GError **error)
+gocl_context_new_sync (GoclDeviceType device_type)
 {
+  GError **error;
+
+  error = gocl_error_prepare ();
+
   return g_initable_new (GOCL_TYPE_CONTEXT,
                          NULL,
                          error,
@@ -330,7 +333,6 @@ gocl_context_new_sync (GoclDeviceType device_type, GError **error)
  * gocl_context_gpu_new_sync:
  * @gl_context: (allow-none): A GL context, or %NULL
  * @gl_display: (allow-none): A GL display, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Attemps to create a new GPU context. If @gl_context and @gl_display
  * are provided (not %NULL), then the context will be setup to share
@@ -341,10 +343,12 @@ gocl_context_new_sync (GoclDeviceType device_type, GError **error)
  * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
-gocl_context_gpu_new_sync (gpointer   gl_context,
-                           gpointer   gl_display,
-                           GError   **error)
+gocl_context_gpu_new_sync (gpointer gl_context, gpointer gl_display)
 {
+  GError **error;
+
+  error = gocl_error_prepare ();
+
   return g_initable_new (GOCL_TYPE_CONTEXT,
                          NULL,
                          error,
@@ -356,29 +360,27 @@ gocl_context_gpu_new_sync (gpointer   gl_context,
 
 /**
  * gocl_context_get_default_gpu_sync:
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Returns platform's default GPU context. The first call to this method will
  * attempt to create a new #GoclContext using a device type of
- * %GOCL_DEVICE_TYPE_GPU. Upon success, the context is cached and subsequent calls
- * will return the same object, increasing its reference count.
+ * %GOCL_DEVICE_TYPE_GPU. Upon success, the context is cached and subsequent
+ * calls will return the same object, increasing its reference count.
  *
  * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
-gocl_context_get_default_gpu_sync (GError **error)
+gocl_context_get_default_gpu_sync (void)
 {
   if (gocl_context_default_gpu != NULL)
     g_object_ref (gocl_context_default_gpu);
   else
-    gocl_context_default_gpu = gocl_context_new_sync (CL_DEVICE_TYPE_GPU, error);
+    gocl_context_default_gpu = gocl_context_new_sync (CL_DEVICE_TYPE_GPU);
 
   return gocl_context_default_gpu;
 }
 
 /**
  * gocl_context_get_default_cpu_sync:
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Returns platform's default CPU context. The first call to this method will
  * attempt to create a new #GoclContext using a device type of
@@ -388,12 +390,12 @@ gocl_context_get_default_gpu_sync (GError **error)
  * Returns: (transfer full): A #GoclContext object, or %NULL on error
  **/
 GoclContext *
-gocl_context_get_default_cpu_sync (GError **error)
+gocl_context_get_default_cpu_sync (void)
 {
   if (gocl_context_default_cpu != NULL)
     g_object_ref (gocl_context_default_cpu);
   else
-    gocl_context_default_cpu = gocl_context_new_sync (CL_DEVICE_TYPE_CPU, error);
+    gocl_context_default_cpu = gocl_context_new_sync (CL_DEVICE_TYPE_CPU);
 
   return gocl_context_default_cpu;
 }
