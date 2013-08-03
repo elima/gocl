@@ -232,12 +232,9 @@ gocl_program_new (GoclContext  *context,
 {
   GoclProgram *self;
   cl_int err_code;
-  GError **error;
 
   g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
   g_return_val_if_fail (sources != NULL, NULL);
-
-  error = gocl_error_prepare ();
 
   self = g_object_new (GOCL_TYPE_PROGRAM,
                        "context", context,
@@ -252,7 +249,7 @@ gocl_program_new (GoclContext  *context,
                                sources,
                                NULL,
                                &err_code);
-  if (gocl_error_check_opencl (err_code, error))
+  if (gocl_error_check_opencl_internal (err_code))
     return NULL;
 
   return self;
@@ -376,11 +373,8 @@ gboolean
 gocl_program_build_sync (GoclProgram *self, const gchar *options)
 {
   cl_int err_code;
-  GError **error;
 
   g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
-
-  error = gocl_error_prepare ();
 
   err_code = clBuildProgram (self->priv->program,
                              0,
@@ -389,7 +383,7 @@ gocl_program_build_sync (GoclProgram *self, const gchar *options)
                              NULL,
                              NULL);
 
-  return ! gocl_error_check_opencl (err_code, error);
+  return ! gocl_error_check_opencl_internal (err_code);
 }
 
 /**
