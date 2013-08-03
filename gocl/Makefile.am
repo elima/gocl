@@ -57,7 +57,8 @@ source_h = \
 	gocl-event.h \
 	gocl-image.h
 
-source_h_priv =
+source_h_priv = \
+	gocl-error-private.h
 
 lib@PRJ_API_NAME@_la_LIBADD = \
 	$(GLIB_LIBS) \

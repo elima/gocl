@@ -1,8 +1,8 @@
 /*
- * gocl.h
+ * gocl-error-private.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -19,21 +19,20 @@
  * for more details.
  */
 
-#ifndef __GOCL_H__
-#define __GOCL_H__
+#ifndef __GOCL_ERROR_PRIVATE_H__
+#define __GOCL_ERROR_PRIVATE_H__
 
-#include <gocl-decls.h>
-#include <gocl-error.h>
-#include <gocl-context.h>
-#include <gocl-device.h>
-#include <gocl-buffer.h>
-#include <gocl-program.h>
-#include <gocl-kernel.h>
-#include <gocl-queue.h>
-#include <gocl-image.h>
+#include <glib.h>
+#include <CL/opencl.h>
 
 G_BEGIN_DECLS
 
+gboolean              gocl_error_check_opencl              (cl_int    err_code,
+                                                            GError  **error);
+
+GError **             gocl_error_prepare                   (void);
+void                  gocl_error_free                      (void);
+
 G_END_DECLS
 
-#endif /* __GOCL_H__ */
+#endif /* __GOCL_ERROR_PRIVATE_H__ */

@@ -2,7 +2,7 @@
  * gocl-error.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -30,8 +30,7 @@ G_BEGIN_DECLS
 #define GOCL_OPENCL_ERROR_DOMAIN_STR "org.gnome.lib.gocl.OpenCL.ErrorDomain"
 #define GOCL_OPENCL_ERROR            g_quark_from_string (GOCL_OPENCL_ERROR_DOMAIN_STR)
 
-gboolean              gocl_error_check_opencl              (cl_int    err_code,
-                                                            GError  **error);
+GError * gocl_error_get_last (void);
 
 G_END_DECLS
 

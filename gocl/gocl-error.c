@@ -29,6 +29,9 @@
  **/
 
 #include "gocl-error.h"
+#include "gocl-error-private.h"
+
+static GError *last_error = NULL;
 
 static const gchar *
 get_error_code_description (cl_int err_code)
@@ -93,6 +96,8 @@ get_error_code_description (cl_int err_code)
  * if not %NULL, with a new #GError with the corresponding domain, code
  * and description.
  *
+ * This is a Gocl private function, not exposed to applications.
+ *
  * Returns: %TRUE if there is an error, %FALSE otherwise
  **/
 gboolean
@@ -110,4 +115,48 @@ gocl_error_check_opencl (cl_int err_code, GError **error)
     {
       return FALSE;
     }
+}
+
+/**
+ * gocl_error_prepare:
+ *
+ * Prepares the internal Gocl error for immediate use, by freeing it if
+ * non-%NULL.
+ *
+ * This is a Gocl private function, not exposed to applications.
+ **/
+GError **
+gocl_error_prepare (void)
+{
+  g_clear_error (&last_error);
+
+  return &last_error;
+}
+
+/**
+ * gocl_error_get_last:
+ *
+ * Retrieves the error that ocurred in the last Gocl operation, if any, or
+ * %NULL if the last operation was successful.
+ *
+ * Returns: (transfer full): A pointer to a newly created error, or %NULL
+ **/
+GError *
+gocl_error_get_last (void)
+{
+  return g_error_copy (last_error);
+}
+
+/**
+ * gocl_error_free:
+ *
+ * Frees the internal Gocl error if it is not %NULL. Applications should
+ * not normally need to ever call this function, except before the end of
+ * execution of the program, to avoid leaking memory from a potential error
+ * in the last Gocl operation.
+ **/
+void
+gocl_error_free (void)
+{
+  gocl_error_prepare ();
 }
