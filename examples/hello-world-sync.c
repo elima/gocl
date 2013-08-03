@@ -38,20 +38,20 @@ main (gint argc, gchar *argv[])
   /* create context */
 
   /* First attempt to create a GPU context and if that fails,try with CPU */
-  context = gocl_context_get_default_gpu_sync (&error);
+  context = gocl_context_get_default_gpu_sync ();
   if (context == NULL)
     {
+      error = gocl_error_get_last ();
       g_print ("Failed to create GPU context (%d): %s\n",
                error->code,
                error->message);
       g_error_free (error);
-      error = NULL;
-
 
       g_print ("Trying with CPU context... ");
-      context = gocl_context_get_default_cpu_sync (&error);
+      context = gocl_context_get_default_cpu_sync ();
       if (context == NULL)
         {
+          error = gocl_error_get_last ();
           g_print ("Failed to create CPU context: %s\n", error->message);
           goto out;
         }
@@ -65,43 +65,22 @@ main (gint argc, gchar *argv[])
 
   /* create a program */
   prog = gocl_program_new_from_file_sync (context,
-                                          EXAMPLES_DIR "hello-world.cl",
-                                          &error);
-  if (prog == NULL)
-    {
-      g_print ("Failed to create program: %s\n", error->message);
-      goto out;
-    }
+                                          EXAMPLES_DIR "hello-world.cl");
   g_print ("Program created\n");
 
   /* build the program */
-  if (! gocl_program_build_sync (prog, "", &error))
-    {
-      g_print ("Failed to build program: %s\n", error->message);
-      goto out;
-    }
+  gocl_program_build_sync (prog, "");
   g_print ("Program built\n");
 
   /* get a kernel */
-  kernel = gocl_program_get_kernel (prog, "my_kernel", &error);
-  if (kernel == NULL)
-    {
-      g_print ("Failed to create kernel: %s\n", error->message);
-      goto out;
-    }
+  kernel = gocl_program_get_kernel (prog, "my_kernel");
   g_print ("Kernel created\n");
 
   /* get work sizes */
   gsize max_workgroup_size;
   gint32 size = WIDTH * HEIGHT;
 
-  max_workgroup_size = gocl_device_get_max_work_group_size (device, &error);
-  if (max_workgroup_size == 0)
-    {
-      g_print ("Failed to obtain device's max work group size: %s\n", error->message);
-      goto out;
-    }
-
+  max_workgroup_size = gocl_device_get_max_work_group_size (device);
   g_print ("Max work group size: %lu\n", max_workgroup_size);
 
   gocl_kernel_set_work_dimension (kernel, 2);
@@ -121,64 +100,28 @@ main (gint argc, gchar *argv[])
   buffer = gocl_buffer_new (context,
                             GOCL_BUFFER_FLAGS_READ_WRITE,
                             data_size,
-                            NULL,
-                            &error);
-  if (buffer == NULL)
-    {
-      g_print ("Failed to create buffer: %s\n", error->message);
-      goto out;
-    }
+                            NULL);
   g_print ("Buffer created\n");
 
   /* set kernel arguments */
-  if (! gocl_kernel_set_argument_buffer (kernel,
-                                         0,
-                                         buffer,
-                                         &error))
-    {
-      g_print ("ERROR: Failed to set 'data' argument to kernel: %s\n", error->message);
-      goto out;
-    }
-
-  if (! gocl_kernel_set_argument_int32 (kernel,
-                                        1,
-                                        1,
-                                        &size,
-                                        &error))
-    {
-      g_print ("ERROR: Failed to set 'size' argument to kernel: %s\n", error->message);
-      goto out;
-    }
+  gocl_kernel_set_argument_buffer (kernel, 0, buffer);
+  gocl_kernel_set_argument_int32 (kernel, 1, 1, &size);
 
   g_print ("Kernel execution starts\n");
 
   /* run the kernel */
   for (i=0; i<RUNS; i++)
-    {
-      if (! gocl_kernel_run_in_device_sync (kernel,
-                                            device,
-                                            NULL,
-                                            &error))
-        {
-          g_print ("ERROR: Failed to run kernel: %s\n", error->message);
-          goto out;
-        }
-    }
+    gocl_kernel_run_in_device_sync (kernel, device, NULL);
 
   g_print ("Kernel execution finished\n");
 
   /* read back buffer */
-  if (! gocl_buffer_read_sync (buffer,
-                               gocl_device_get_default_queue (device, NULL),
-                               data,
-                               sizeof (guchar) * size,
-                               0,
-                               NULL,
-                               &error))
-    {
-      g_print ("Failed to read buffer: %s\n", error->message);
-      goto out;
-    }
+  gocl_buffer_read_sync (buffer,
+                         gocl_device_get_default_queue (device),
+                         data,
+                         sizeof (guchar) * size,
+                         0,
+                         NULL);
 
   /* print results */
   if (WIDTH * HEIGHT <= 32 * 32)

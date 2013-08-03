@@ -165,13 +165,14 @@ main (gint argc, gchar *argv[])
   glContext = glXGetCurrentContext ();
   glDisplay = glXGetCurrentDisplay ();
 
-  gocl_data.context = gocl_context_gpu_new_sync (glContext, glDisplay, &err);
+  gocl_data.context = gocl_context_gpu_new_sync (glContext, glDisplay);
   if (gocl_data.context == NULL)
     {
+      err = gocl_error_get_last ();
       g_print ("Error creating GPU context: %s\n", err->message);
       g_clear_error (&err);
 
-      gocl_data.context = gocl_context_get_default_cpu_sync (&err);
+      gocl_data.context = gocl_context_get_default_cpu_sync ();
       if (gocl_data.context == NULL)
         {
           g_print ("Error creating CPU context: %s\n", err->message);
@@ -196,16 +197,12 @@ main (gint argc, gchar *argv[])
       cogl_texture_get_gl_texture (tex, &gl_tex, NULL);
       gocl_data.img = gocl_image_new_from_gl_texture (gocl_data.context,
                                                       GOCL_BUFFER_FLAGS_READ_ONLY,
-                                                      gl_tex,
-                                                      &err);
-      g_assert_no_error (err);
+                                                      gl_tex);
 
       cogl_texture_get_gl_texture (tex1, &gl_tex1, NULL);
       gocl_data.img1 = gocl_image_new_from_gl_texture (gocl_data.context,
                                                        GOCL_BUFFER_FLAGS_WRITE_ONLY,
-                                                       gl_tex1,
-                                                       &err);
-      g_assert_no_error (err);
+                                                       gl_tex1);
 
       g_object_get (gocl_data.img1,
                     "width", &width,
@@ -231,10 +228,7 @@ main (gint argc, gchar *argv[])
                                       GOCL_IMAGE_TYPE_2D,
                                       cogl_texture_get_width (tex),
                                       cogl_texture_get_height (tex),
-                                      0,
-                                      &err);
-      g_assert_no_error (err);
-
+                                      0);
       g_object_get (gocl_data.img,
                     "width", &width,
                     "height", &height,
@@ -246,9 +240,7 @@ main (gint argc, gchar *argv[])
                                        GOCL_IMAGE_TYPE_2D,
                                        width,
                                        height,
-                                       0,
-                                       &err);
-      g_assert_no_error (err);
+                                       0);
     }
 
   g_print ("CL images created\n");
@@ -261,21 +253,16 @@ main (gint argc, gchar *argv[])
   /* OpenCL program */
   gocl_data.program =
     gocl_program_new_from_file_sync (gocl_data.context,
-                                     EXAMPLES_DIR "gaussian-blur.cl",
-                                     &err);
-  g_assert_no_error (err);
+                                     EXAMPLES_DIR "gaussian-blur.cl");
   g_print ("Program created\n");
 
   /* build program */
-  gocl_program_build_sync (gocl_data.program, "", &err);
-  g_assert_no_error (err);
+  gocl_program_build_sync (gocl_data.program, "");
   g_print ("Program built\n");
 
   /* get kernel */
   gocl_data.kernel = gocl_program_get_kernel (gocl_data.program,
-                                              "gaussian_blur",
-                                              &err);
-  g_assert_no_error (err);
+                                              "gaussian_blur");
   g_print ("Kernel ready\n");
 
   /* create gaussian mask */
@@ -289,53 +276,39 @@ main (gint argc, gchar *argv[])
                               GOCL_BUFFER_FLAGS_READ_ONLY |
                               GOCL_BUFFER_FLAGS_USE_HOST_PTR,
                               mask_alloc_size,
-                              mask,
-                              &err);
-  g_assert_no_error (err);
+                              mask);
 
   /* set kernel arguments */
   gocl_kernel_set_argument_buffer (gocl_data.kernel,
                                    0,
-                                   GOCL_BUFFER (gocl_data.img),
-                                   &err);
-  g_assert_no_error (err);
+                                   GOCL_BUFFER (gocl_data.img));
   gocl_kernel_set_argument_buffer (gocl_data.kernel,
                                    1,
-                                   GOCL_BUFFER (gocl_data.img1),
-                                   &err);
-  g_assert_no_error (err);
-  gocl_kernel_set_argument_buffer (gocl_data.kernel, 2, mask_buf, &err);
-  g_assert_no_error (err);
-  gocl_kernel_set_argument_int32 (gocl_data.kernel, 3, 1, &mask_size, &err);
-  g_assert_no_error (err);
+                                   GOCL_BUFFER (gocl_data.img1));
+  gocl_kernel_set_argument_buffer (gocl_data.kernel, 2, mask_buf);
+  gocl_kernel_set_argument_int32 (gocl_data.kernel, 3, 1, &mask_size);
 
+  /* set global and local work sizes */
   gocl_kernel_set_work_dimension (gocl_data.kernel, 2);
   gocl_kernel_set_global_work_size (gocl_data.kernel, width, height, 0);
   gocl_kernel_set_local_work_size (gocl_data.kernel, 0, 0, 0);
 
   /* run kernel */
-  gocl_kernel_run_in_device_sync (gocl_data.kernel,
-                                  gocl_data.device,
-                                  NULL,
-                                  &err);
-  g_assert_no_error (err);
+  gocl_kernel_run_in_device_sync (gocl_data.kernel, gocl_data.device, NULL);
   g_print ("kernel ran\n");
 
   if (! gl_sharing)
     {
       GoclQueue *queue;
 
-      queue = gocl_device_get_default_queue (gocl_data.device, &err);
-      g_assert_no_error (err);
+      queue = gocl_device_get_default_queue (gocl_data.device);
 
       /* read back from the blurred image */
       gocl_buffer_read_all_sync (GOCL_BUFFER (gocl_data.img1),
                                  queue,
                                  tex_data,
                                  NULL,
-                                 NULL,
-                                 &err);
-      g_assert_no_error (err);
+                                 NULL);
 
       /* fill the target texture */
       cogl_texture_set_region (tex1,
