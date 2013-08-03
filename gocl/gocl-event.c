@@ -82,7 +82,7 @@
 
 #include "gocl-event.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-device.h"
 #include "gocl-context.h"
 
@@ -275,7 +275,6 @@ gocl_event_constructed (GObject *obj)
 {
   GoclEvent *self = GOCL_EVENT (obj);
   cl_int err_code;
-  GError *error = NULL;
 
   if (self->priv->event == NULL)
     {
@@ -288,26 +287,15 @@ gocl_event_constructed (GObject *obj)
       _context = gocl_context_get_context (context);
 
       self->priv->event = clCreateUserEvent (_context, &err_code);
-      if (gocl_error_check_opencl (err_code, &error))
-        {
-          g_warning ("Error creating user event: %s\n", error->message);
-          g_error_free (error);
-        }
-      else
-        {
-          self->priv->is_user_event = TRUE;
-        }
+      if (! gocl_error_check_opencl_internal (err_code))
+        self->priv->is_user_event = TRUE;
     }
 
   err_code = clSetEventCallback (self->priv->event,
                                  CL_COMPLETE,
                                  event_on_notify,
                                  self);
-  if (gocl_error_check_opencl (err_code, &error))
-    {
-      g_warning ("Error setting event callback: %s\n", error->message);
-      g_error_free (error);
-    }
+  gocl_error_check_opencl_internal (err_code);
 }
 
 static void
