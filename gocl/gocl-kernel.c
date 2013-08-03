@@ -58,7 +58,7 @@
 
 #include "gocl-kernel.h"
 
-#include "gocl-error.h"
+#include "gocl-error-private.h"
 #include "gocl-program.h"
 
 typedef gsize WorkSize[3];
@@ -264,7 +264,6 @@ gocl_kernel_get_kernel (GoclKernel *self)
  * @index: The index of this argument in the kernel function
  * @size: The size of @buffer, in bytes
  * @buffer: A pointer to an arbitrary block of memory
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Sets the value of the kernel argument at @index, as an arbitrary block of
  * memory.
@@ -275,8 +274,7 @@ gboolean
 gocl_kernel_set_argument (GoclKernel      *self,
                           guint            index,
                           gsize            size,
-                          const gpointer  *buffer,
-                          GError         **error)
+                          const gpointer  *buffer)
 {
   cl_int err_code;
 
@@ -287,7 +285,7 @@ gocl_kernel_set_argument (GoclKernel      *self,
                              size,
                              buffer);
 
-  return ! gocl_error_check_opencl (err_code, error);
+  return ! gocl_error_check_opencl_internal (err_code);
 }
 
 /**
@@ -297,7 +295,6 @@ gocl_kernel_set_argument (GoclKernel      *self,
  * @num_elements: The number of int32 elements in @buffer
  * @buffer: (array length=num_elements) (element-type guint32): Array of int32
  * values
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Sets the value of the kernel argument at @index, as an array of int32.
  *
@@ -307,14 +304,12 @@ gboolean
 gocl_kernel_set_argument_int32 (GoclKernel  *self,
                                 guint        index,
                                 gsize        num_elements,
-                                gint32      *buffer,
-                                GError     **error)
+                                gint32      *buffer)
 {
   return gocl_kernel_set_argument (self,
                                    index,
                                    sizeof (cl_uint) * num_elements,
-                                   (const gpointer) buffer,
-                                   error);
+                                   (const gpointer) buffer);
 }
 
 /**
@@ -324,7 +319,6 @@ gocl_kernel_set_argument_int32 (GoclKernel  *self,
  * @num_elements: The number of float elements in @buffer
  * @buffer: (array length=num_elements) (element-type gfloat): Array of float
  * values
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Sets the value of the kernel argument at @index, as an array of floats.
  *
@@ -334,14 +328,12 @@ gboolean
 gocl_kernel_set_argument_float (GoclKernel  *self,
                                 guint        index,
                                 gsize        num_elements,
-                                gfloat      *buffer,
-                                GError     **error)
+                                gfloat      *buffer)
 {
   return gocl_kernel_set_argument (self,
                                    index,
                                    sizeof (cl_float) * num_elements,
-                                   (const gpointer) buffer,
-                                   error);
+                                   (const gpointer) buffer);
 }
 
 /**
@@ -349,7 +341,6 @@ gocl_kernel_set_argument_float (GoclKernel  *self,
  * @self: The #GoclKernel
  * @index: The index of this argument in the kernel function
  * @buffer: A #GoclBuffer
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Sets the value of the kernel argument at @index, as a buffer object.
  *
@@ -358,8 +349,7 @@ gocl_kernel_set_argument_float (GoclKernel  *self,
 gboolean
 gocl_kernel_set_argument_buffer (GoclKernel  *self,
                                  guint        index,
-                                 GoclBuffer  *buffer,
-                                 GError     **error)
+                                 GoclBuffer  *buffer)
 {
   cl_int err_code;
   cl_mem buf;
@@ -373,7 +363,7 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
                              sizeof (cl_mem),
                              &buf);
 
-  return ! gocl_error_check_opencl (err_code, error);
+  return ! gocl_error_check_opencl_internal (err_code);
 }
 
 /**
@@ -382,7 +372,6 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
  * @device: A #GoclDevice to run the kernel on
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List of #GoclEvent
  * events to wait for, or %NULL
- * @error: (out) (allow-none): A pointer to a #GError, or %NULL
  *
  * Runs the kernel on the specified device, blocking the program
  * until the kernel execution finishes. For non-blocking version,
@@ -396,8 +385,7 @@ gocl_kernel_set_argument_buffer (GoclKernel  *self,
 gboolean
 gocl_kernel_run_in_device_sync (GoclKernel  *self,
                                 GoclDevice  *device,
-                                GList       *event_wait_list,
-                                GError     **error)
+                                GList       *event_wait_list)
 {
   cl_int err_code;
   cl_event event;
@@ -430,7 +418,7 @@ gocl_kernel_run_in_device_sync (GoclKernel  *self,
                             &event);
   g_free (_event_wait_list);
 
-  if (gocl_error_check_opencl (err_code, error))
+  if (gocl_error_check_opencl_internal (err_code))
     return FALSE;
 
   clWaitForEvents (1, &event);

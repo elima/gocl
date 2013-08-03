@@ -59,27 +59,22 @@ cl_kernel              gocl_kernel_get_kernel                 (GoclKernel *self)
 gboolean               gocl_kernel_set_argument               (GoclKernel      *self,
                                                                guint            index,
                                                                gsize            size,
-                                                               const gpointer  *buffer,
-                                                               GError         **error);
+                                                               const gpointer  *buffer);
 gboolean               gocl_kernel_set_argument_int32         (GoclKernel  *self,
                                                                guint        index,
                                                                gsize        num_elements,
-                                                               gint32      *buffer,
-                                                               GError     **error);
+                                                               gint32      *buffer);
 gboolean               gocl_kernel_set_argument_float         (GoclKernel  *self,
                                                                guint        index,
                                                                gsize        num_elements,
-                                                               gfloat      *buffer,
-                                                               GError     **error);
+                                                               gfloat      *buffer);
 gboolean               gocl_kernel_set_argument_buffer        (GoclKernel  *self,
                                                                guint        index,
-                                                               GoclBuffer  *buffer,
-                                                               GError     **error);
+                                                               GoclBuffer  *buffer);
 
 gboolean               gocl_kernel_run_in_device_sync         (GoclKernel  *self,
                                                                GoclDevice  *device,
-                                                               GList       *event_wait_list,
-                                                               GError     **error);
+                                                               GList       *event_wait_list);
 GoclEvent *            gocl_kernel_run_in_device              (GoclKernel  *self,
                                                                GoclDevice  *device,
                                                                GList       *event_wait_list);
