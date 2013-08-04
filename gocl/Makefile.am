@@ -20,6 +20,12 @@ else
 AM_CFLAGS += -DG_DISABLE_ASSERT -DG_DISABLE_CHECKS
 endif
 
+if HAVE_COGL
+AM_CFLAGS += \
+	$(COGL_CFLAGS) \
+	-DHAS_COGL="1"
+endif
+
 @PRJ_NAME@-marshal.h: @PRJ_NAME@-marshal.list
 	glib-genmarshal --header \
 		--prefix=@PRJ_NAME@_marshal @PRJ_NAME@-marshal.list > @PRJ_NAME@-marshal.h
@@ -63,6 +69,11 @@ source_h_priv = \
 lib@PRJ_API_NAME@_la_LIBADD = \
 	$(GLIB_LIBS) \
 	-lOpenCL
+
+if HAVE_COGL
+lib@PRJ_API_NAME@_la_LIBADD += \
+	$(COGL_LIBS)
+endif
 
 lib@PRJ_API_NAME@_la_CFLAGS  = \
 	-I OpenCL \

@@ -452,3 +452,35 @@ gocl_image_new_from_gl_texture (GoclContext *context,
                          "gl-texture", texture,
                          NULL);
 }
+
+#ifdef HAS_COGL
+
+/**
+ * gocl_image_new_from_cogl_texture:
+ * @context: The #GoclContext to create the image in
+ * @flags: An OR'ed combination of values from #GoclBufferFlags
+ * @texture: The #CoglTexture
+ *
+ * Creates a new image buffer from a #CoglTexture object. This only works if the
+ * OpenCL platform supports the <i>cl_khr_gl_sharing</i> extension, and the
+ * @context has been created for sharing with OpenGL, using
+ * gocl_context_gpu_new_sync().
+ *
+ * Returns: (transfer full): A newly created #GoclImage, or %NULL on error
+ **/
+GoclImage *
+gocl_image_new_from_cogl_texture (GoclContext *context,
+                                  guint        flags,
+                                  CoglTexture *texture)
+{
+  guint gl_tex;
+
+  g_return_val_if_fail (GOCL_IS_CONTEXT (context), NULL);
+  g_return_val_if_fail (texture != NULL, NULL);
+
+  cogl_texture_get_gl_texture (texture, &gl_tex, NULL);
+
+  return gocl_image_new_from_gl_texture (context, flags, gl_tex);
+}
+
+#endif

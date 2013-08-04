@@ -25,6 +25,10 @@
 #include <glib-object.h>
 #include <CL/opencl.h>
 
+#ifdef HAS_COGL
+#include <cogl/cogl.h>
+#endif
+
 #include <gocl-decls.h>
 #include <gocl-device.h>
 #include <gocl-buffer.h>
@@ -92,6 +96,11 @@ GoclImage *            gocl_image_new                          (GoclContext   *c
 GoclImage *            gocl_image_new_from_gl_texture          (GoclContext *context,
                                                                 guint        flags,
                                                                 guint        texture);
+#ifdef HAS_COGL
+GoclImage *            gocl_image_new_from_cogl_texture        (GoclContext *context,
+                                                                guint        flags,
+                                                                CoglTexture *texture);
+#endif
 
 G_END_DECLS
 
