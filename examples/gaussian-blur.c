@@ -192,17 +192,13 @@ main (gint argc, gchar *argv[])
 
   if (gl_sharing)
     {
-      GLuint gl_tex, gl_tex1;
+      gocl_data.img = gocl_image_new_from_cogl_texture (gocl_data.context,
+                                                        GOCL_BUFFER_FLAGS_READ_ONLY,
+                                                        tex);
 
-      cogl_texture_get_gl_texture (tex, &gl_tex, NULL);
-      gocl_data.img = gocl_image_new_from_gl_texture (gocl_data.context,
-                                                      GOCL_BUFFER_FLAGS_READ_ONLY,
-                                                      gl_tex);
-
-      cogl_texture_get_gl_texture (tex1, &gl_tex1, NULL);
-      gocl_data.img1 = gocl_image_new_from_gl_texture (gocl_data.context,
-                                                       GOCL_BUFFER_FLAGS_WRITE_ONLY,
-                                                       gl_tex1);
+      gocl_data.img1 = gocl_image_new_from_cogl_texture (gocl_data.context,
+                                                         GOCL_BUFFER_FLAGS_WRITE_ONLY,
+                                                         tex1);
 
       g_object_get (gocl_data.img1,
                     "width", &width,
