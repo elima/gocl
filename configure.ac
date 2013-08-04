@@ -94,11 +94,11 @@ if test "x$found_introspection" = "xyes"; then
 fi
 
 # If Cogl is present, build cogl examples
-enable_cogl_examples="yes"
+have_cogl="yes"
 PKG_CHECK_MODULES([COGL], [cogl-1.0 > 1.14],,
-    [enable_cogl_examples="no"])
+    [have_cogl="no"])
 
-AM_CONDITIONAL([ENABLE_COGL_EXAMPLES], [test "x$enable_cogl_examples" = "xyes"])
+AM_CONDITIONAL([HAVE_COGL], [test "x$have_cogl" = "xyes"])
 
 # GTK Doc
 GTK_DOC_CHECK([1.11])
@@ -142,5 +142,5 @@ echo "    Build introspection data:   ${enable_introspection}"
 echo "     Build API documentation:   ${enable_gtk_doc}"
 echo "           Enable debug mode:   ${enable_debug}"
 echo "      Enable automated tests:   ${enable_tests}"
-echo "        Enable Cogl examples:   ${enable_cogl_examples}"
+echo "     Enable Cogl integration:   ${have_cogl}"
 echo ""

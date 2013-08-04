@@ -32,7 +32,7 @@ hello_world_sync_CFLAGS = $(AM_CFLAGS)
 hello_world_sync_LDADD = $(AM_LIBS)
 hello_world_sync_SOURCES = hello-world-sync.c
 
-if ENABLE_COGL_EXAMPLES
+if HAVE_COGL
 
 noinst_PROGRAMS += \
 	gaussian-blur
