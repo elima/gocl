@@ -69,7 +69,13 @@ guint                  gocl_device_get_max_compute_units      (GoclDevice *self)
 gboolean               gocl_device_acquire_gl_objects_sync    (GoclDevice  *self,
                                                                GList       *object_list,
                                                                GList       *event_wait_list);
+GoclEvent *            gocl_device_acquire_gl_objects         (GoclDevice  *self,
+                                                               GList       *object_list,
+                                                               GList       *event_wait_list);
 gboolean               gocl_device_release_gl_objects_sync    (GoclDevice  *self,
+                                                               GList       *object_list,
+                                                               GList       *event_wait_list);
+GoclEvent *            gocl_device_release_gl_objects         (GoclDevice  *self,
                                                                GList       *object_list,
                                                                GList       *event_wait_list);
 

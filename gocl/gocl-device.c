@@ -49,6 +49,7 @@
 #include "gocl-device.h"
 
 #include "gocl-error-private.h"
+#include "gocl-error.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
 
@@ -214,6 +215,63 @@ get_property (GObject    *obj,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
       break;
     }
+}
+
+static gboolean
+acquire_or_release_gl_objects (GoclDevice  *self,
+                               gboolean     acquire,
+                               GList       *object_list,
+                               GList       *event_wait_list,
+                               cl_event    *out_event)
+{
+  cl_int err_code;
+  GoclQueue *queue;
+  cl_command_queue _queue;
+
+  cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
+
+  cl_mem *_object_list;
+  guint object_list_len;
+
+  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
+
+  if (object_list == NULL)
+    return TRUE;
+
+  queue = gocl_device_get_default_queue (self);
+  if (queue == NULL)
+    return FALSE;
+
+  _queue = gocl_queue_get_queue (queue);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+  _object_list = gocl_buffer_list_to_array (object_list,
+                                            &object_list_len);
+
+  if (acquire)
+    err_code = clEnqueueAcquireGLObjects (_queue,
+                                          object_list_len,
+                                          _object_list,
+                                          event_wait_list_len,
+                                          _event_wait_list,
+                                          out_event);
+  else
+    err_code = clEnqueueReleaseGLObjects (_queue,
+                                          object_list_len,
+                                          _object_list,
+                                          event_wait_list_len,
+                                          _event_wait_list,
+                                          out_event);
+
+  g_free (_event_wait_list);
+  g_free (_object_list);
+
+  if (gocl_error_check_opencl_internal (err_code))
+    return FALSE;
+
+  return TRUE;
 }
 
 /* public */
@@ -416,49 +474,82 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
                                      GList       *object_list,
                                      GList       *event_wait_list)
 {
-  cl_int err_code;
   cl_event event;
-  GoclQueue *queue;
-  cl_command_queue _queue;
 
-  cl_event *_event_wait_list = NULL;
-  guint event_wait_list_len;
-
-  cl_mem *_object_list;
-  guint object_list_len;
-
-  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
-
-  if (object_list == NULL)
-    return TRUE;
-
-  queue = gocl_device_get_default_queue (self);
-  if (queue == NULL)
-    return FALSE;
-
-  _queue = gocl_queue_get_queue (queue);
-
-  _event_wait_list = gocl_event_list_to_array (event_wait_list,
-                                               &event_wait_list_len);
-  _object_list = gocl_buffer_list_to_array (object_list,
-                                            &object_list_len);
-
-  err_code = clEnqueueAcquireGLObjects (_queue,
-                                        object_list_len,
-                                        _object_list,
-                                        event_wait_list_len,
-                                        _event_wait_list,
-                                        &event);
-  g_free (_event_wait_list);
-  g_free (_object_list);
-
-  if (gocl_error_check_opencl_internal (err_code))
-    return FALSE;
+  if (! acquire_or_release_gl_objects (self,
+                                       TRUE,
+                                       object_list,
+                                       event_wait_list,
+                                       &event))
+    {
+      return FALSE;
+    }
 
   clWaitForEvents (1, &event);
   clReleaseEvent (event);
 
   return TRUE;
+}
+
+/**
+ * gocl_device_acquire_gl_objects:
+ * @self: The #GoclDevice
+ * @object_list: (element-type Gocl.Buffer) (allow-none): A #GList of
+ * #GoclBuffer objects, or %NULL
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * objects to wait for, or %NULL
+ *
+ * Enqueues an asynchronous request for acquiring the #GoclBuffer (or deriving)
+ * objects contained in @object_list, which were created from OpenGL objects.
+ * For a blocking version of this method, see
+ * gocl_device_acquire_gl_object_sync().
+ *
+ * This method works only if the <i>cl_khr_gl_sharing</i> OpenCL extension is
+ * supported.
+ *
+ * Returns: (transfer none): A #GoclEvent to get notified when the operation
+ * finishes
+ **/
+GoclEvent *
+gocl_device_acquire_gl_objects (GoclDevice  *self,
+                                GList       *object_list,
+                                GList       *event_wait_list)
+{
+  GoclEvent *_event = NULL;
+  cl_event event;
+  GoclQueue *queue;
+
+  queue = gocl_device_get_default_queue (self);
+
+  if (! acquire_or_release_gl_objects (self,
+                                       TRUE,
+                                       object_list,
+                                       event_wait_list,
+                                       &event))
+    {
+      GError *error;
+      GoclEventResolverFunc resolver_func;
+
+      error = gocl_error_get_last ();
+
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             NULL);
+      resolver_func = gocl_event_steal_resolver_func (_event);
+      resolver_func (_event, error);
+      g_error_free (error);
+    }
+  else
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             "event", event,
+                             NULL);
+      gocl_event_set_event_wait_list (_event, event_wait_list);
+      gocl_event_steal_resolver_func (_event);
+    }
+
+  return _event;
 }
 
 /**
@@ -482,47 +573,80 @@ gocl_device_release_gl_objects_sync (GoclDevice  *self,
                                      GList       *object_list,
                                      GList       *event_wait_list)
 {
-  cl_int err_code;
   cl_event event;
-  GoclQueue *queue;
-  cl_command_queue _queue;
 
-  cl_event *_event_wait_list = NULL;
-  guint event_wait_list_len;
-
-  cl_mem *_object_list;
-  guint object_list_len;
-
-  g_return_val_if_fail (GOCL_IS_DEVICE (self), FALSE);
-
-  if (object_list == NULL)
-    return TRUE;
-
-  queue = gocl_device_get_default_queue (self);
-  if (queue == NULL)
-    return FALSE;
-
-  _queue = gocl_queue_get_queue (queue);
-
-  _event_wait_list = gocl_event_list_to_array (event_wait_list,
-                                               &event_wait_list_len);
-  _object_list = gocl_buffer_list_to_array (object_list,
-                                            &object_list_len);
-
-  err_code = clEnqueueReleaseGLObjects (_queue,
-                                        object_list_len,
-                                        _object_list,
-                                        event_wait_list_len,
-                                        _event_wait_list,
-                                        &event);
-  g_free (_event_wait_list);
-  g_free (_object_list);
-
-  if (gocl_error_check_opencl_internal (err_code))
-    return FALSE;
+  if (! acquire_or_release_gl_objects (self,
+                                       FALSE,
+                                       object_list,
+                                       event_wait_list,
+                                       &event))
+    {
+      return FALSE;
+    }
 
   clWaitForEvents (1, &event);
   clReleaseEvent (event);
 
   return TRUE;
+}
+
+/**
+ * gocl_device_release_gl_objects:
+ * @self: The #GoclDevice
+ * @object_list: (element-type Gocl.Buffer) (allow-none): A #GList of
+ * #GoclBuffer objects, or %NULL
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * objects to wait for, or %NULL
+ *
+ * Enqueues an asynchronous request for releasing the #GoclBuffer (or deriving)
+ * objects contained in @object_list, which were created from OpenGL objects.
+ * For a blocking version of this method, see
+ * gocl_device_release_gl_object_sync().
+ *
+ * This method works only if the <i>cl_khr_gl_sharing</i> OpenCL extension is
+ * supported.
+ *
+ * Returns: (transfer none): A #GoclEvent to get notified when the operation
+ * finishes
+ **/
+GoclEvent *
+gocl_device_release_gl_objects (GoclDevice  *self,
+                                GList       *object_list,
+                                GList       *event_wait_list)
+{
+  GoclEvent *_event = NULL;
+  cl_event event;
+  GoclQueue *queue;
+
+  queue = gocl_device_get_default_queue (self);
+
+  if (! acquire_or_release_gl_objects (self,
+                                       FALSE,
+                                       object_list,
+                                       event_wait_list,
+                                       &event))
+    {
+      GError *error;
+      GoclEventResolverFunc resolver_func;
+
+      error = gocl_error_get_last ();
+
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             NULL);
+      resolver_func = gocl_event_steal_resolver_func (_event);
+      resolver_func (_event, error);
+      g_error_free (error);
+    }
+  else
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             "event", event,
+                             NULL);
+      gocl_event_set_event_wait_list (_event, event_wait_list);
+      gocl_event_steal_resolver_func (_event);
+    }
+
+  return _event;
 }
