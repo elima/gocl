@@ -39,7 +39,7 @@ noinst_PROGRAMS += \
 
 # gaussian-blur
 gaussian_blur_CFLAGS = $(AM_CFLAGS) $(COGL_CFLAGS) -DHAS_COGL
-gaussian_blur_LDADD = $(AM_LIBS) $(COGL_LIBS) -lGL
+gaussian_blur_LDADD = $(AM_LIBS) $(COGL_LIBS) -lGL -lm
 gaussian_blur_SOURCES = gaussian-blur.c
 
 endif
