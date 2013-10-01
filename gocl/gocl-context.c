@@ -226,6 +226,8 @@ gocl_context_init (GoclContext *self)
   GoclContextPrivate *priv;
 
   self->priv = priv = GOCL_CONTEXT_GET_PRIVATE (self);
+
+  priv->context = NULL;
 }
 
 static void
@@ -233,7 +235,8 @@ gocl_context_finalize (GObject *obj)
 {
   GoclContext *self = GOCL_CONTEXT (obj);
 
-  clReleaseContext (self->priv->context);
+  if (self->priv->context != NULL)
+    clReleaseContext (self->priv->context);
 
   G_OBJECT_CLASS (gocl_context_parent_class)->finalize (obj);
 
