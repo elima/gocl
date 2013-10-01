@@ -47,7 +47,6 @@ main (gint argc, gchar *argv[])
       g_error_free (error);
       error = NULL;
 
-
       g_print ("Trying with CPU context... ");
       context = gocl_context_get_default_cpu_sync (&error);
       if (context == NULL)
