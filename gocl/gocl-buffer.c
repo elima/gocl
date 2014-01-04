@@ -60,7 +60,7 @@
 
 #include "gocl-buffer.h"
 
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"
 

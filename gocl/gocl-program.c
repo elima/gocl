@@ -55,8 +55,8 @@
 
 #include "gocl-program.h"
 
+#include "gocl-private.h"
 #include "gocl-error.h"
-#include "gocl-error-private.h"
 
 struct _GoclProgramPrivate
 {

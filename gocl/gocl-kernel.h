@@ -54,8 +54,6 @@ struct _GoclKernelClass
 
 GType                  gocl_kernel_get_type                   (void) G_GNUC_CONST;
 
-cl_kernel              gocl_kernel_get_kernel                 (GoclKernel *self);
-
 gboolean               gocl_kernel_set_argument               (GoclKernel      *self,
                                                                guint            index,
                                                                gsize            size,

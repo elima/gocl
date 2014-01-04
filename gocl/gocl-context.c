@@ -57,7 +57,7 @@
 
 #include "gocl-context.h"
 
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 #include "gocl-decls.h"
 
 #define MAX_PLATFORMS 8

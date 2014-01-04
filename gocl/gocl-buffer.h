@@ -73,8 +73,6 @@ struct _GoclBufferClass
 
 GType                  gocl_buffer_get_type                   (void) G_GNUC_CONST;
 
-cl_mem                 gocl_buffer_get_buffer                 (GoclBuffer *self);
-
 GoclEvent *            gocl_buffer_read                       (GoclBuffer *self,
                                                                GoclQueue  *queue,
                                                                gpointer    target_ptr,

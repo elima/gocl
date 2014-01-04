@@ -62,8 +62,6 @@ GoclProgram *          gocl_program_new                        (GoclContext  *co
 GoclProgram *          gocl_program_new_from_file_sync         (GoclContext *context,
                                                                 const gchar *filename);
 
-cl_program             gocl_program_get_program                (GoclProgram *self);
-
 GoclContext *          gocl_program_get_context                (GoclProgram *self);
 
 GoclKernel *           gocl_program_get_kernel                 (GoclProgram *self,

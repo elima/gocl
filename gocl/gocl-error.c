@@ -29,7 +29,7 @@
  **/
 
 #include "gocl-error.h"
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 
 static GError *last_error = NULL;
 

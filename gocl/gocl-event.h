@@ -60,8 +60,6 @@ struct _GoclEventClass
 
 GType                  gocl_event_get_type                   (void) G_GNUC_CONST;
 
-cl_event               gocl_event_get_event                  (GoclEvent *self);
-
 GoclQueue *            gocl_event_get_queue                  (GoclEvent *self);
 
 GoclEventResolverFunc  gocl_event_steal_resolver_func        (GoclEvent *self);

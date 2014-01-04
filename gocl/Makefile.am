@@ -68,7 +68,7 @@ source_h = \
 	gocl-image.h
 
 source_h_priv = \
-	gocl-error-private.h
+	gocl-private.h
 
 lib@PRJ_API_NAME@_la_LIBADD = \
 	$(GLIB_LIBS) \

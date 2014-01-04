@@ -82,7 +82,7 @@
 
 #include "gocl-event.h"
 
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 #include "gocl-device.h"
 #include "gocl-context.h"
 

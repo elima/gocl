@@ -48,7 +48,7 @@
 
 #include "gocl-image.h"
 
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 #include "gocl-context.h"
 
 struct _GoclImagePrivate

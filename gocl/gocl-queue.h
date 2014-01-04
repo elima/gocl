@@ -52,8 +52,6 @@ struct _GoclQueueClass
 
 GType                  gocl_queue_get_type                   (void) G_GNUC_CONST;
 
-cl_command_queue       gocl_queue_get_queue                  (GoclQueue *self);
-
 guint                  gocl_queue_get_flags                  (GoclQueue *self);
 
 G_END_DECLS

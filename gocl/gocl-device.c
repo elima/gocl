@@ -48,7 +48,7 @@
 
 #include "gocl-device.h"
 
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 #include "gocl-error.h"
 #include "gocl-decls.h"
 #include "gocl-context.h"

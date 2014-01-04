@@ -58,7 +58,7 @@
 
 #include "gocl-kernel.h"
 
-#include "gocl-error-private.h"
+#include "gocl-private.h"
 #include "gocl-program.h"
 
 typedef gsize WorkSize[3];

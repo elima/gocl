@@ -67,8 +67,6 @@ GoclContext *          gocl_context_gpu_new_sync               (gpointer gl_cont
 GoclContext *          gocl_context_get_default_cpu_sync       (void);
 GoclContext *          gocl_context_get_default_gpu_sync       (void);
 
-cl_context             gocl_context_get_context                (GoclContext *self);
-
 guint                  gocl_context_get_num_devices            (GoclContext *self);
 
 GoclDevice *           gocl_context_get_device_by_index        (GoclContext *self,
