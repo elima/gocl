@@ -25,7 +25,7 @@
 #include <glib-object.h>
 #include <CL/opencl.h>
 
-#include <gocl-queue.h>
+#include "gocl-queue.h"
 
 G_BEGIN_DECLS
 

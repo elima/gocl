@@ -29,10 +29,9 @@
 #include <cogl/cogl.h>
 #endif
 
-#include <gocl-decls.h>
-#include <gocl-device.h>
-#include <gocl-buffer.h>
-#include <gocl-image.h>
+#include "gocl-device.h"
+#include "gocl-buffer.h"
+#include "gocl-image.h"
 
 G_BEGIN_DECLS
 

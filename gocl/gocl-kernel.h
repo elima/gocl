@@ -24,8 +24,8 @@
 
 #include <glib-object.h>
 
-#include <gocl-device.h>
-#include <gocl-event.h>
+#include "gocl-device.h"
+#include "gocl-event.h"
 
 G_BEGIN_DECLS
 

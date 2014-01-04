@@ -2,7 +2,7 @@
  * gocl.h
  *
  * Gocl - GLib/GObject wrapper for OpenCL
- * Copyright (C) 2012 Igalia S.L.
+ * Copyright (C) 2012-2013 Igalia S.L.
  *
  * Authors:
  *  Eduardo Lima Mitev <elima@igalia.com>
@@ -22,15 +22,15 @@
 #ifndef __GOCL_H__
 #define __GOCL_H__
 
-#include <gocl-decls.h>
-#include <gocl-error.h>
-#include <gocl-context.h>
-#include <gocl-device.h>
-#include <gocl-buffer.h>
-#include <gocl-program.h>
-#include <gocl-kernel.h>
-#include <gocl-queue.h>
-#include <gocl-image.h>
+#include "gocl-decls.h"
+#include "gocl-error.h"
+#include "gocl-context.h"
+#include "gocl-device.h"
+#include "gocl-buffer.h"
+#include "gocl-program.h"
+#include "gocl-kernel.h"
+#include "gocl-queue.h"
+#include "gocl-image.h"
 
 G_BEGIN_DECLS
 

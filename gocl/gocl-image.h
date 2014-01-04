@@ -25,8 +25,8 @@
 #include <glib-object.h>
 #include <CL/opencl.h>
 
-#include <gocl-decls.h>
-#include <gocl-buffer.h>
+#include "gocl-decls.h"
+#include "gocl-buffer.h"
 
 G_BEGIN_DECLS
 

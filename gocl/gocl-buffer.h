@@ -25,9 +25,9 @@
 #include <glib-object.h>
 #include <CL/opencl.h>
 
-#include <gocl-decls.h>
-#include <gocl-queue.h>
-#include <gocl-event.h>
+#include "gocl-decls.h"
+#include "gocl-queue.h"
+#include "gocl-event.h"
 
 G_BEGIN_DECLS
 
