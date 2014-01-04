@@ -48,7 +48,8 @@ CFILE_GLOB=$(top_srcdir)/$(DOC_MODULE)/*.c
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=
+IGNORE_HFILES = \
+	$(top_srcdir)/$(DOC_MODULE)/gocl-error-private.h
 
 EXTRA_HFILES=
 
@@ -73,7 +74,7 @@ expand_content_files= \
 # e.g. INCLUDES=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 
-INCLUDES=-I$(top_srcdir) -I$(top_srcdir)/$(DOC_MODULE) $(GLIB_CFLAGS)
+GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/$(DOC_MODULE) $(GLIB_CFLAGS)
 GTKDOC_LIBS=$(top_builddir)/$(DOC_MODULE)/lib@PRJ_API_NAME@.la $(GLIB_LIBS)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.

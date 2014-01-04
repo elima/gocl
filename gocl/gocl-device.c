@@ -502,7 +502,7 @@ gocl_device_acquire_gl_objects_sync (GoclDevice  *self,
  * Enqueues an asynchronous request for acquiring the #GoclBuffer (or deriving)
  * objects contained in @object_list, which were created from OpenGL objects.
  * For a blocking version of this method, see
- * gocl_device_acquire_gl_object_sync().
+ * gocl_device_acquire_gl_objects_sync().
  *
  * This method works only if the <i>cl_khr_gl_sharing</i> OpenCL extension is
  * supported.
@@ -601,7 +601,7 @@ gocl_device_release_gl_objects_sync (GoclDevice  *self,
  * Enqueues an asynchronous request for releasing the #GoclBuffer (or deriving)
  * objects contained in @object_list, which were created from OpenGL objects.
  * For a blocking version of this method, see
- * gocl_device_release_gl_object_sync().
+ * gocl_device_release_gl_objects_sync().
  *
  * This method works only if the <i>cl_khr_gl_sharing</i> OpenCL extension is
  * supported.

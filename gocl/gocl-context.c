@@ -43,10 +43,6 @@
  * gocl_context_get_device_by_index(), where index must be a value between 0 and
  * the maximum number of devices in the context, minus one. Number of devices can
  * be obtained with gocl_context_get_num_devices().
- *
- * Memory buffers can be created in context's memory to that kernels can access
- * and share them during execution. To create a buffer,
- * gocl_context_create_buffer() method is provided.
  **/
 
 /**

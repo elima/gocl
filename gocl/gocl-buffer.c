@@ -29,7 +29,7 @@
  * are directly accessible from OpenCL programs.
  *
  * Buffers are created from a #GoclContext, by calling
- * gocl_context_create_buffer() method. It is possible to initialize the
+ * gocl_buffer_new() method. It is possible to initialize the
  * contents of the buffer upon creating, by specifying a block of host memory
  * to copy data from, and the appropriate flag from #GoclBufferFlags.
  * Also, buffers can be initialized at any time by calling
