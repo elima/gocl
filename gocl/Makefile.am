@@ -89,8 +89,7 @@ lib@PRJ_API_NAME@_la_LDFLAGS = \
 
 lib@PRJ_API_NAME@_la_SOURCES = \
 	$(source_c) \
-	$(source_h) \
-	$(source_h_priv)
+	$(source_h)
 
 nodist_lib@PRJ_API_NAME@_la_SOURCES = \
 	@PRJ_NAME@-marshal.c \
@@ -98,8 +97,9 @@ nodist_lib@PRJ_API_NAME@_la_SOURCES = \
 
 @PRJ_NAME@dir = $(includedir)/@PRJ_API_NAME@
 @PRJ_NAME@_HEADERS = \
-	$(source_h) \
-	$(source_h_priv)
+	$(source_h)
+
+EXTRA_DIST += $(source_h_priv)
 
 # introspection support
 if HAVE_INTROSPECTION
