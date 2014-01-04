@@ -29,8 +29,8 @@ m4_define([prj_home],       [http://labs.igalia.com/gocl])
 # odd micro numbers indicate in-progress development
 # even micro numbers indicate released versions
 m4_define([prj_version_major], [0])
-m4_define([prj_version_minor], [1])
-m4_define([prj_version_micro], [7])
+m4_define([prj_version_minor], [2])
+m4_define([prj_version_micro], [0])
 
 m4_define([prj_version],
           [prj_version_major.prj_version_minor.prj_version_micro])
@@ -132,7 +132,7 @@ AM_CONDITIONAL(ENABLE_DEBUG, test x"${enable_debug}" = x"yes")
 # Output files
 AC_OUTPUT([
         Makefile
-        gocl/gocl-0.1.pc
+        gocl/gocl-0.2.pc
         gocl/Makefile
         examples/Makefile
         doc/Makefile
