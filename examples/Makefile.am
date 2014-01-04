@@ -44,4 +44,7 @@ gaussian_blur_SOURCES = gaussian-blur.c
 
 endif
 
-EXTRA_DIST =
+EXTRA_DIST = \
+	hello-world.cl \
+	gaussian-blur.cl \
+	colorful.jpg
