@@ -86,6 +86,7 @@ EXTRA_DIST +=
 MAINTAINERCLEANFILES = \
 	$(DOC_MODULE)-overrides.txt \
 	$(DOC_MODULE)-sections.txt \
+	$(DOC_MODULE)-types \
 	$(DOC_MODULE).types Makefile.in
 
 maintainer-clean-local:

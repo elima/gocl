@@ -38,6 +38,7 @@ endif
 
 BUILT_SOURCES = @PRJ_NAME@-marshal.c @PRJ_NAME@-marshal.h
 EXTRA_DIST = $(@PRJ_NAME@_marshal_list)
+CLEANFILES += @PRJ_NAME@-marshal.c  @PRJ_NAME@-marshal.h
 
 # libraries
 lib_LTLIBRARIES = lib@PRJ_API_NAME@.la
@@ -129,7 +130,7 @@ gir_DATA = $(INTROSPECTION_GIRS)
 typelibdir = @INTROSPECTION_TYPELIBDIR@
 typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-CLEANFILES += $(dist_gir_DATA) $(typelib_DATA)
+CLEANFILES += $(gir_DATA) $(typelib_DATA)
 endif
 
 maintainer-clean-local:

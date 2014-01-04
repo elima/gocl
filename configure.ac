@@ -91,6 +91,12 @@ if test "x$found_introspection" = "xyes"; then
 
    PRJ_GIR_TARGET_NAME="prj_gir_namespace"_"prj_version_major"_"prj_version_minor"_gir
    AC_SUBST(PRJ_GIR_TARGET_NAME)
+
+   INTROSPECTION_GIRDIR=${prefix}/share/gir-1.0
+   AC_SUBST(INTROSPECTION_GIRDIR)
+
+   INTROSPECTION_TYPELIBDIR=${libdir}/girepository-1.0
+   AC_SUBST(INTROSPECTION_TYPELIBDIR)
 fi
 
 # If Cogl is present, build cogl examples
