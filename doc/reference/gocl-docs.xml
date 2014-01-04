@@ -76,7 +76,10 @@
   <part id="goclglossary">
     <title>Glossaries</title>
 
-    <xi:include href="xml/annotation-glossary.xml"/>
+    <!-- @FIXME: why annotation-glossary.xml is not found with
+         'make distcheck'?
+    <xi:include href="annotation-glossary.html"/>
+    -->
   </part>
 
   <index>
