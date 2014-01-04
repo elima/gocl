@@ -9,8 +9,8 @@ DIST_SUBDIRS = \
 	doc
 
 EXTRA_DIST = \
-	autogen.sh \
-	m4/introspection.m4
+	autogen.sh
+
 
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection

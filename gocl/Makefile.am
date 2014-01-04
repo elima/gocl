@@ -26,15 +26,18 @@ AM_CFLAGS += \
 	-DHAS_COGL="1"
 endif
 
-@PRJ_NAME@-marshal.h: @PRJ_NAME@-marshal.list
-	glib-genmarshal --header \
-		--prefix=@PRJ_NAME@_marshal @PRJ_NAME@-marshal.list > @PRJ_NAME@-marshal.h
+@PRJ_NAME@_marshal_list = $(addprefix $(srcdir)/, @PRJ_NAME@-marshal.list)
 
-@PRJ_NAME@-marshal.c: @PRJ_NAME@-marshal.list
+@PRJ_NAME@-marshal.h: $(@PRJ_NAME@_marshal_list)
+	glib-genmarshal --header \
+		--prefix=@PRJ_NAME@_marshal $(@PRJ_NAME@_marshal_list) > @PRJ_NAME@-marshal.h
+
+@PRJ_NAME@-marshal.c: $(@PRJ_NAME@_marshal_list)
 	glib-genmarshal --body \
-		--prefix=@PRJ_NAME@_marshal @PRJ_NAME@-marshal.list > @PRJ_NAME@-marshal.c
+		--prefix=@PRJ_NAME@_marshal $(@PRJ_NAME@_marshal_list) > @PRJ_NAME@-marshal.c
 
 BUILT_SOURCES = @PRJ_NAME@-marshal.c @PRJ_NAME@-marshal.h
+EXTRA_DIST = $(@PRJ_NAME@_marshal_list)
 
 # libraries
 lib_LTLIBRARIES = lib@PRJ_API_NAME@.la
@@ -131,6 +134,3 @@ endif
 
 maintainer-clean-local:
 	rm -rf tmp-introspect*
-
-EXTRA_DIST = \
-	@PRJ_NAME@-marshal.list

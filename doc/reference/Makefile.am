@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-# We require automake 1.6 at least.
+# We require automake 1.11 at least.
 AUTOMAKE_OPTIONS = 1.11
 
 # This is a blank Makefile.am for using gtk-doc.
@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS = 1.11
 # of using the various options.
 
 # The name of the module, e.g. 'glib'.
-DOC_MODULE=gocl
+DOC_MODULE=@PRJ_NAME@
 
 # The top-level SGML file. You can change this if you want to.
 DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.xml

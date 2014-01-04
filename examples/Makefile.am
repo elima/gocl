@@ -5,7 +5,7 @@ examples_dir = `pwd`/
 
 AM_CFLAGS = \
 	$(GLIB_CFLAGS) \
-	-I$(top_srcdir)/gocl \
+	-I $(top_srcdir)/@PRJ_NAME@/ \
 	-DEXAMPLES_DIR="\"$(examples_dir)\""
 
 if ENABLE_DEBUG
@@ -16,7 +16,7 @@ endif
 
 AM_LIBS = \
 	$(GLIB_LIBS) \
-	$(top_srcdir)/gocl/lib@PRJ_API_NAME@.la
+	$(top_builddir)/@PRJ_NAME@/lib@PRJ_API_NAME@.la
 
 noinst_PROGRAMS = \
 	hello-world \
