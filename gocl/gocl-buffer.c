@@ -47,6 +47,10 @@
 /**
  * GoclBufferClass:
  * @parent_class: The parent class
+ * @create_cl_mem: Virtual method used by deriving classes to create the
+ *                 internal #cl_mem object
+ * @read_all: Virtual method used by deriving classes to read all the
+ *            content of the buffer into host memory
  *
  * The class for #GoclBuffer objects.
  **/

@@ -143,6 +143,8 @@ gocl_error_check_opencl_internal (cl_int err_code)
  * non-%NULL.
  *
  * This is a Gocl private function, not exposed to applications.
+ *
+ * Returns: (transfer none): A pointer to Gocl's internal #GError
  **/
 GError **
 gocl_error_prepare (void)

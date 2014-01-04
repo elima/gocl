@@ -379,6 +379,7 @@ read_all (GoclBuffer          *buffer,
  * gocl_image_new:
  * @context: The #GoclContext to create the image in
  * @flags: An OR'ed combination of values from #GoclBufferFlags
+ * @host_ptr: (allow-none): Pointer to host memory, or %NULL
  * @type: Image type value from #GoclImageType
  * @width: Image width in pixels
  * @height: Image height in pixels, zero if image type is 1D
