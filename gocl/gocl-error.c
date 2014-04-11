@@ -105,10 +105,10 @@ gocl_error_check_opencl (cl_int err_code, GError **error)
 {
   if (err_code != CL_SUCCESS)
     {
-      g_set_error (error,
-                   GOCL_OPENCL_ERROR,
-                   err_code,
-                   get_error_code_description (err_code));
+      g_set_error_literal (error,
+                           GOCL_OPENCL_ERROR,
+                           err_code,
+                           get_error_code_description (err_code));
       return TRUE;
     }
   else
@@ -124,10 +124,10 @@ gocl_error_check_opencl_internal (cl_int err_code)
 
   if (err_code != CL_SUCCESS)
     {
-      g_set_error (&last_error,
-                   GOCL_OPENCL_ERROR,
-                   err_code,
-                   get_error_code_description (err_code));
+      g_set_error_literal (&last_error,
+                           GOCL_OPENCL_ERROR,
+                           err_code,
+                           get_error_code_description (err_code));
       return TRUE;
     }
   else
