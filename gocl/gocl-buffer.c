@@ -116,6 +116,18 @@ static cl_int         read_all                          (GoclBuffer          *se
                                                          cl_event            *event_wait_list,
                                                          guint                event_wait_list_len,
                                                          cl_event            *out_event);
+static gpointer
+map                                                     (GoclBuffer       *self,
+                                                         cl_mem            buffer,
+                                                         cl_command_queue  queue,
+                                                         cl_map_flags      map_flags,
+                                                         gboolean          blocking,
+                                                         gsize             offset,
+                                                         gsize             cb,
+                                                         cl_event         *event_wait_list,
+                                                         guint             event_wait_list_len,
+                                                         cl_event         *out_event,
+                                                         cl_int           *out_errcode);
 
 G_DEFINE_TYPE_WITH_CODE (GoclBuffer, gocl_buffer, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
@@ -137,6 +149,7 @@ gocl_buffer_class_init (GoclBufferClass *class)
 
   class->create_cl_mem = create_cl_mem;
   class->read_all = read_all;
+  class->map = map;
 
   g_object_class_install_property (obj_class, PROP_CONTEXT,
                                    g_param_spec_object ("context",
@@ -332,6 +345,31 @@ read_all (GoclBuffer          *self,
                               event_wait_list_len,
                               event_wait_list,
                               out_event);
+}
+
+static gpointer
+map (GoclBuffer       *self,
+     cl_mem            buffer,
+     cl_command_queue  queue,
+     cl_map_flags      map_flags,
+     gboolean          blocking,
+     gsize             offset,
+     gsize             cb,
+     cl_event         *event_wait_list,
+     guint             event_wait_list_len,
+     cl_event         *out_event,
+     cl_int           *out_errcode)
+{
+  return clEnqueueMapBuffer (queue,
+                             buffer,
+                             blocking,
+                             map_flags,
+                             offset,
+                             cb,
+                             event_wait_list_len,
+                             event_wait_list,
+                             out_event,
+                             out_errcode);
 }
 
 /* public */
@@ -787,6 +825,187 @@ gocl_buffer_read_all_sync (GoclBuffer *self,
                               _event_wait_list,
                               event_wait_list_len,
                               NULL);
+  g_free (_event_wait_list);
+
+  return ! gocl_error_check_opencl_internal (err_code);
+}
+
+/**
+ * gocl_buffer_map:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @offset: The offset in bytes in the buffer
+ * @size: The size in bytes of the buffer
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ *
+ * Returns: (transfer none): A #GoclEvent to get notified when the map
+ * operation finishes
+ */
+GoclEvent *
+gocl_buffer_map (GoclBuffer   *self,
+                 GoclQueue    *queue,
+                 GoclMapFlags  map_flags,
+                 gsize         offset,
+                 gsize         size,
+                 GList        *event_wait_list)
+{
+  GoclBufferClass *class;
+  cl_command_queue _queue;
+  cl_int err_code;
+  cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
+  cl_mem buffer;
+  cl_event event = NULL;
+  GoclEventResolverFunc resolver_func;
+  GoclEvent *_event;
+  GError *error = NULL;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  buffer = gocl_buffer_get_buffer (GOCL_BUFFER (self));
+
+  class = GOCL_BUFFER_GET_CLASS (self);
+  g_assert (class->read_all != NULL);
+
+  class->map (self,
+              buffer,
+              _queue,
+              map_flags,
+              FALSE,
+              offset,
+              size,
+              _event_wait_list,
+              event_wait_list_len,
+              &event,
+              &err_code);
+
+  g_free (_event_wait_list);
+
+  if (gocl_error_check_opencl (err_code, &error))
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             NULL);
+      resolver_func = gocl_event_steal_resolver_func (_event);
+      resolver_func (_event, error);
+      g_error_free (error);
+    }
+  else
+    {
+      _event = g_object_new (GOCL_TYPE_EVENT,
+                             "queue", queue,
+                             "event", event,
+                             NULL);
+      gocl_event_set_event_wait_list (_event, event_wait_list);
+      gocl_event_steal_resolver_func (_event);
+    }
+
+  gocl_event_idle_unref (_event);
+
+  return _event;
+}
+
+/**
+ * gocl_buffer_map_sync:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @offset: The offset in bytes in the buffer
+ * @size: The size in bytes of the buffer
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ *
+ * Returns: A pointer to the mapped buffer
+ */
+gpointer
+gocl_buffer_map_sync (GoclBuffer   *self,
+                      GoclQueue    *queue,
+                      GoclMapFlags  map_flags,
+                      gsize         offset,
+                      gsize         size,
+                      GList        *event_wait_list)
+{
+  GoclBufferClass *class;
+  cl_command_queue _queue;
+  cl_int err_code;
+  cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
+  cl_mem buffer;
+  cl_event event = NULL;
+  gpointer ret;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  buffer = gocl_buffer_get_buffer (GOCL_BUFFER (self));
+
+  class = GOCL_BUFFER_GET_CLASS (self);
+  g_assert (class->read_all != NULL);
+
+  ret = class->map (self,
+                    buffer,
+                    _queue,
+                    map_flags,
+                    FALSE,
+                    offset,
+                    size,
+                    _event_wait_list,
+                    event_wait_list_len,
+                    &event,
+                    &err_code);
+
+  g_free (_event_wait_list);
+
+  return ret;
+}
+
+/**
+ * gocl_buffer_unmap:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @mapped_ptr: The pointer where the buffer was previously mapped with #gocl_buffer_map
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ *
+ * Returns: %TRUE if the buffer was successfully unmapped, otherwise %FALSE
+ */
+gboolean
+gocl_buffer_unmap (GoclBuffer   *self,
+                   GoclQueue    *queue,
+                   gpointer      mapped_ptr,
+                   GList        *event_wait_list)
+{
+  gint err_code;
+  cl_command_queue _queue;
+  cl_mem buffer;
+  cl_event *_event_wait_list = NULL;
+  guint event_wait_list_len;
+  cl_event event = NULL;
+
+  g_return_val_if_fail (GOCL_IS_BUFFER (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_QUEUE (queue), FALSE);
+  g_return_val_if_fail (mapped_ptr != NULL, FALSE);
+
+  _event_wait_list = gocl_event_list_to_array (event_wait_list,
+                                               &event_wait_list_len);
+
+  _queue = gocl_queue_get_queue (queue);
+
+  buffer = gocl_buffer_get_buffer (GOCL_BUFFER (self));
+
+  err_code = clEnqueueUnmapMemObject (_queue, buffer, mapped_ptr, event_wait_list_len, _event_wait_list, &event);
+
   g_free (_event_wait_list);
 
   return ! gocl_error_check_opencl_internal (err_code);

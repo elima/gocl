@@ -41,6 +41,7 @@ G_BEGIN_DECLS
 typedef struct _GoclBufferClass GoclBufferClass;
 typedef struct _GoclBuffer GoclBuffer;
 typedef struct _GoclBufferPrivate GoclBufferPrivate;
+typedef enum   _GoclMapFlags GoclMapFlags;
 
 struct _GoclBuffer
 {
@@ -69,6 +70,23 @@ struct _GoclBufferClass
                             cl_event            *event_wait_list,
                             guint                event_wait_list_len,
                             cl_event            *out_event);
+  gpointer (* map)         (GoclBuffer       *self,
+                            cl_mem            buffer,
+                            cl_command_queue  queue,
+                            cl_map_flags      map_flags,
+                            gboolean          blocking,
+                            gsize             offset,
+                            gsize             cb,
+                            cl_event         *event_wait_list,
+                            guint             event_wait_list_len,
+                            cl_event         *out_event,
+                            cl_int           *out_errcode);
+};
+
+enum _GoclMapFlags
+{
+  GOCL_BUFFER_MAP_READ  = CL_MAP_READ,
+  GOCL_BUFFER_MAP_WRITE = CL_MAP_WRITE
 };
 
 GType                  gocl_buffer_get_type                   (void) G_GNUC_CONST;
@@ -103,6 +121,25 @@ gboolean               gocl_buffer_read_all_sync              (GoclBuffer  *self
                                                                gpointer     target_ptr,
                                                                gsize       *size,
                                                                GList       *event_wait_list);
+
+GoclEvent *            gocl_buffer_map                        (GoclBuffer   *self,
+                                                               GoclQueue    *queue,
+                                                               GoclMapFlags  map_flags,
+                                                               gsize         offset,
+                                                               gsize         size,
+                                                               GList        *event_wait_list);
+
+gpointer               gocl_buffer_map_sync                   (GoclBuffer   *self,
+                                                               GoclQueue    *queue,
+                                                               GoclMapFlags  map_flags,
+                                                               gsize         offset,
+                                                               gsize         size,
+                                                               GList        *event_wait_list);
+
+gboolean               gocl_buffer_unmap                      (GoclBuffer   *self,
+                                                               GoclQueue    *queue,
+                                                               gpointer      mapped_ptr,
+                                                               GList        *event_wait_list);
 
 cl_mem *               gocl_buffer_list_to_array              (GList *list,
                                                                guint *len);
