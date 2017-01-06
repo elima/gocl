@@ -170,6 +170,12 @@ gocl_queue_dispose (GObject *obj)
 {
   GoclQueue *self = GOCL_QUEUE (obj);
 
+  /* ensure that no commands are lost when the queue is disposed */
+  if (!gocl_queue_flush (self))
+    {
+      g_warning ("Could not flush the queue successfully.");
+    }
+
   if (self->priv->device != NULL)
     {
       g_object_unref (self->priv->device);
@@ -294,3 +300,44 @@ gocl_queue_get_flags (GoclQueue *self)
 
   return self->priv->flags;
 }
+
+/**
+ * gocl_queue_flush:
+ * @self: The #GoclQueue
+ *
+ * Issues all previously queued OpenCL commands in a command-queue to the
+ * device associated with the command-queue.
+ *
+ * Returns: #TRUE on success, otherwise #FALSE
+ */
+gboolean
+gocl_queue_flush (GoclQueue *self)
+{
+  gint ret;
+
+  g_return_val_if_fail (GOCL_IS_QUEUE (self), FALSE);
+
+  ret = clFlush (self->priv->queue);
+
+  return ! gocl_error_check_opencl_internal (ret);
+};
+
+/**
+ * gocl_queue_finish:
+ *
+ * Blocks until all previously queued OpenCL commands in command_queue are
+ * issued to the associated device and have completed.
+ *
+ * Returns: #TRUE on success, otherwise #FALSE
+ */
+gboolean
+gocl_queue_finish (GoclQueue *self)
+{
+  gint ret;
+
+  g_return_val_if_fail (GOCL_IS_QUEUE (self), FALSE);
+
+  ret = clFinish (self->priv->queue);
+
+  return ! gocl_error_check_opencl_internal (ret);
+};

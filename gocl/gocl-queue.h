@@ -54,6 +54,10 @@ GType                  gocl_queue_get_type                   (void) G_GNUC_CONST
 
 guint                  gocl_queue_get_flags                  (GoclQueue *self);
 
+gboolean               gocl_queue_flush                      (GoclQueue *self);
+
+gboolean               gocl_queue_finish                     (GoclQueue *self);
+
 G_END_DECLS
 
 #endif /* __GOCL_QUEUE_H__ */
