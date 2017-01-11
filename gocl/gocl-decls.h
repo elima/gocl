@@ -84,6 +84,15 @@ typedef enum
 } GoclBufferFlags;
 
 /**
+ *  GoclBufferMapFlags:
+ */
+typedef enum
+{
+  GOCL_BUFFER_MAP_READ  = CL_MAP_READ,
+  GOCL_BUFFER_MAP_WRITE = CL_MAP_WRITE
+} GoclBufferMapFlags;
+
+/**
  * GoclQueueFlags:
  * @GOCL_QUEUE_FLAGS_OUT_OF_ORDER: Enables out-of-order execution of commands.
  * @GOCL_QUEUE_FLAGS_PROFILING:    Enables profiling of commands.

@@ -843,12 +843,12 @@ gocl_buffer_read_all_sync (GoclBuffer *self,
  * operation finishes
  */
 GoclEvent *
-gocl_buffer_map (GoclBuffer   *self,
-                 GoclQueue    *queue,
-                 GoclMapFlags  map_flags,
-                 gsize         offset,
-                 gsize         size,
-                 GList        *event_wait_list)
+gocl_buffer_map (GoclBuffer         *self,
+                 GoclQueue          *queue,
+                 GoclBufferMapFlags map_flags,
+                 gsize              offset,
+                 gsize              size,
+                 GList              *event_wait_list)
 {
   GoclBufferClass *class;
   cl_command_queue _queue;
@@ -924,12 +924,12 @@ gocl_buffer_map (GoclBuffer   *self,
  * Returns: A pointer to the mapped buffer
  */
 gpointer
-gocl_buffer_map_sync (GoclBuffer   *self,
-                      GoclQueue    *queue,
-                      GoclMapFlags  map_flags,
-                      gsize         offset,
-                      gsize         size,
-                      GList        *event_wait_list)
+gocl_buffer_map_sync (GoclBuffer         *self,
+                      GoclQueue          *queue,
+                      GoclBufferMapFlags map_flags,
+                      gsize              offset,
+                      gsize              size,
+                      GList              *event_wait_list)
 {
   GoclBufferClass *class;
   cl_command_queue _queue;
