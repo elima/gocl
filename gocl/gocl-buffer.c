@@ -921,7 +921,10 @@ gocl_buffer_map (GoclBuffer         *self,
  * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
  * object to wait for, or %NULL
  *
- * Returns: A pointer to the mapped buffer
+ * The returned pointer is not to be freed, instead it must be unmapped using
+ * #gocl_buffer_unmap.
+ *
+ * Returns: A pointer to the mapped buffer, or %NULL if an error occured
  */
 gpointer
 gocl_buffer_map_sync (GoclBuffer         *self,
