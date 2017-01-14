@@ -471,3 +471,70 @@ gocl_program_build_finish (GoclProgram   *self,
     ! g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (result),
                                              error);
 }
+
+/**
+ * gocl_program_get_build_status:
+ * @self: The #GoclProgram
+ * @device: The #GoclDevice for which the build status is requested
+ * Returns: A #GoclProgramBuildStatus or %-1 if an error that is not related to
+ * the build status itself occured
+ */
+GoclProgramBuildStatus
+gocl_program_get_build_status (GoclProgram *self, GoclDevice *device)
+{
+  cl_int err_code;
+  cl_build_status build_status;
+  size_t build_status_size;
+
+  g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_DEVICE  (device), FALSE);
+
+  err_code = clGetProgramBuildInfo (self->priv->program,
+                                    gocl_device_get_id (device),
+                                    CL_PROGRAM_BUILD_STATUS,
+                                    sizeof (cl_build_status),
+                                    &build_status,
+                                    &build_status_size);
+
+  if (gocl_error_check_opencl_internal (err_code))
+    {
+      return -1;
+    }
+
+  return build_status;
+}
+
+/**
+ * gocl_program_get_build_info:
+ * @self: The #GoclProgram
+ * @device: The #GoclDevice for which a build information is requested
+ * Returns: (transfer full): The string corresponding the the requested
+ * #GoclProgramBuildInfo or %NULL if an error occured
+ */
+gchar *
+gocl_program_get_build_info (GoclProgram *self, GoclDevice *device, GoclProgramBuildInfo build_info)
+{
+  cl_int err_code;
+  char *ret;
+  size_t ret_size;
+
+  g_return_val_if_fail (GOCL_IS_PROGRAM (self), FALSE);
+  g_return_val_if_fail (GOCL_IS_DEVICE  (device), FALSE);
+
+  ret = g_malloc (8096); /* should be sufficient */
+
+  err_code = clGetProgramBuildInfo (self->priv->program,
+                                    gocl_device_get_id (device),
+                                    build_info,
+                                    8096,
+                                    ret,
+                                    &ret_size);
+
+  if (gocl_error_check_opencl_internal (err_code))
+    {
+      g_free (ret);
+      return NULL;
+    }
+
+  return ret;
+}

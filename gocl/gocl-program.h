@@ -77,6 +77,11 @@ void                   gocl_program_build                      (GoclProgram     
 gboolean               gocl_program_build_finish               (GoclProgram   *self,
                                                                 GAsyncResult  *result,
                                                                 GError       **error);
+GoclProgramBuildStatus gocl_program_get_build_status           (GoclProgram *self,
+                                                                GoclDevice *device);
+gchar *                gocl_program_get_build_info             (GoclProgram          *self,
+                                                                GoclDevice           *device,
+                                                                GoclProgramBuildInfo  build_info);
 
 G_END_DECLS
 
