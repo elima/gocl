@@ -974,6 +974,40 @@ gocl_buffer_map_sync (GoclBuffer         *self,
 }
 
 /**
+ * gocl_buffer_map_as_bytes_sync:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @offset: The offset in bytes in the buffer
+ * @size: The size in bytes of the buffer
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ *
+ * Returns: (transfer full) (allow-none): A #GBytes holding the mapped bytes,
+ * or %NULL if an error occured
+ */
+GBytes *
+gocl_buffer_map_as_bytes_sync (GoclBuffer         *self,
+                               GoclQueue          *queue,
+                               GoclBufferMapFlags map_flags,
+                               gsize              offset,
+                               gsize              size,
+                               GList              *event_wait_list)
+{
+  gpointer ret;
+
+  ret = gocl_buffer_map_sync (self, queue, map_flags, offset, size, event_wait_list);
+
+  if (ret)
+    {
+      return g_bytes_new_take (ret, size);
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
+/**
  * gocl_buffer_unmap:
  * @self: The #GoclBuffer
  * @queue: A #GoclQueue where the operation will be enqueued

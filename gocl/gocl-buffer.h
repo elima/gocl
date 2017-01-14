@@ -129,6 +129,13 @@ gpointer               gocl_buffer_map_sync                   (GoclBuffer       
                                                                gsize               size,
                                                                GList              *event_wait_list);
 
+GBytes *               gocl_buffer_map_as_bytes_sync          (GoclBuffer *self,
+                                                               GoclQueue          *queue,
+                                                               GoclBufferMapFlags  map_flags,
+                                                               gsize               offset,
+                                                               gsize               size,
+                                                               GList              *event_wait_list);
+
 gboolean               gocl_buffer_unmap                      (GoclBuffer   *self,
                                                                GoclQueue    *queue,
                                                                gpointer      mapped_ptr,
