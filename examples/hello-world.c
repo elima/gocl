@@ -112,6 +112,33 @@ on_program_built (GObject      *obj,
                                    0,
                                    NULL);
 
+  GList *map_wait_list = NULL;
+  guint8 *mapped_data;
+
+  map_wait_list = g_list_append (map_wait_list, write_event);
+
+  /* map buffer into virtual memory */
+  mapped_data = gocl_buffer_map_sync (buffer,
+                                      gocl_device_get_default_queue (device),
+                                      GOCL_BUFFER_MAP_READ,
+                                      0,
+                                      data_size,
+                                      map_wait_list);
+
+  g_list_free (map_wait_list);
+
+  if (mapped_data == NULL)
+    {
+      g_print ("Failed to map data.");
+      goto out;
+    }
+
+  gint i;
+  for (i = 0; i < data_size; i++)
+    {
+      g_assert (0 == mapped_data[i]);
+    }
+
   /* set kernel arguments */
   gocl_kernel_set_argument_buffer (kernel, 0, buffer);
   gocl_kernel_set_argument_int32 (kernel, 1, 1, &size);
