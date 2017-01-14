@@ -113,6 +113,26 @@ typedef enum
   GOCL_IMAGE_TYPE_3D        = CL_MEM_OBJECT_IMAGE3D
 } GoclImageType;
 
+/**
+ * GoclProgramBuildStatus:
+ */
+typedef enum
+{
+  GOCL_PROGRAM_BUILD_NONE        = CL_BUILD_NONE,
+  GOCL_PROGRAM_BUILD_ERROR       = CL_BUILD_ERROR,
+  GOCL_PROGRAM_BUILD_SUCCESS     = CL_BUILD_SUCCESS,
+  GOCL_PROGRAM_BUILD_IN_PROGRESS = CL_BUILD_IN_PROGRESS
+} GoclProgramBuildStatus;
+
+/**
+ * GoclProgramBuildInfo:
+ */
+typedef enum
+{
+  GOCL_PROGRAM_BUILD_OPTIONS = CL_PROGRAM_BUILD_OPTIONS,
+  GOCL_PROGRAM_BUILD_LOG     = CL_PROGRAM_BUILD_LOG
+} GoclProgramBuildInfo;
+
 G_END_DECLS
 
 #endif /* __GOCL_DECLS_H__ */
