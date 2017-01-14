@@ -141,6 +141,11 @@ gboolean               gocl_buffer_unmap                      (GoclBuffer   *sel
                                                                gpointer      mapped_ptr,
                                                                GList        *event_wait_list);
 
+gboolean               gocl_buffer_unmap_bytes                (GoclBuffer *self,
+                                                               GoclQueue  *queue,
+                                                               GBytes     *mapped_bytes,
+                                                               GList      *event_wait_list);
+
 cl_mem *               gocl_buffer_list_to_array              (GList *list,
                                                                guint *len);
 

@@ -1047,3 +1047,31 @@ gocl_buffer_unmap (GoclBuffer   *self,
 
   return ! gocl_error_check_opencl_internal (err_code);
 }
+
+/**
+ * gocl_buffer_unmap_bytes:
+ * @self: The #GoclBuffer
+ * @queue: A #GoclQueue where the operation will be enqueued
+ * @mapped_bytes: The #GBytes where the buffer was previously mapped with
+ * #gocl_buffer_map_bytes_sync
+ * @event_wait_list: (element-type Gocl.Event) (allow-none): List or #GoclEvent
+ * object to wait for, or %NULL
+ *
+ * Once unmapped, the #GBytes will point to invalid memory and must be
+ * disposed.
+ *
+ * Returns: %TRUE if the buffer was successfully unmapped, otherwise %FALSE
+ */
+gboolean
+gocl_buffer_unmap_bytes (GoclBuffer   *self,
+                         GoclQueue    *queue,
+                         GBytes       *mapped_bytes,
+                         GList        *event_wait_list)
+{
+  g_return_val_if_fail (mapped_bytes != NULL, FALSE);
+
+  return gocl_buffer_unmap (self,
+                            queue,
+                            (gpointer) g_bytes_get_data (mapped_bytes, NULL),
+                            event_wait_list);
+}
