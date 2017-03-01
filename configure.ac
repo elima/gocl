@@ -99,6 +99,16 @@ if test "x$found_introspection" = "xyes"; then
    AC_SUBST(INTROSPECTION_TYPELIBDIR)
 fi
 
+# Vala bindings
+VAPIGEN_CHECK()
+if test "x$enable_vala" = "xyes"; then
+   PRJ_VAPI_TARGET_NAME="prj_name"_"prj_version_major"_"prj_version_minor"_vapi
+   AC_SUBST(PRJ_VAPI_TARGET_NAME)
+
+   VALA_VAPIDIR=${prefix}/share/vala/vapi
+   AC_SUBST(VALA_VAPIDIR)
+fi
+
 # If Cogl is present, build cogl examples
 have_cogl="yes"
 PKG_CHECK_MODULES([COGL], [cogl-1.0 > 1.14],,
@@ -145,6 +155,7 @@ echo "   ====================="
 echo ""
 echo "              Install prefix:   ${prefix}"
 echo "    Build introspection data:   ${enable_introspection}"
+echo "         Build Vala bindings:   ${enable_vala}"
 echo "     Build API documentation:   ${enable_gtk_doc}"
 echo "           Enable debug mode:   ${enable_debug}"
 echo "      Enable automated tests:   ${enable_tests}"
