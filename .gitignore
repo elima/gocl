@@ -31,6 +31,7 @@ stamp-h1
 *.pc
 *.gir
 *.typelib
+*.vapi
 *-marshal.c
 *-marshal.h
 

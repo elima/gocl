@@ -133,5 +133,24 @@ typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 CLEANFILES += $(gir_DATA) $(typelib_DATA)
 endif
 
+if ENABLE_VAPIGEN
+
+-include $(VAPIGEN_MAKEFILE)
+VAPIGEN_VAPIS =
+
+@PRJ_API_NAME@.vapi: @PRJ_GIR_API_NAME@.gir @PRJ_API_NAME@.deps
+
+VAPIGEN_VAPIS += @PRJ_API_NAME@.vapi
+
+@PRJ_VAPI_TARGET_NAME@_DEPS = gio-2.0
+@PRJ_VAPI_TARGET_NAME@_METADATADIRS = $(srcdir)
+@PRJ_VAPI_TARGET_NAME@_FILES = @PRJ_GIR_API_NAME@.gir
+
+vapidir = @VALA_VAPIDIR@
+vapi_DATA = $(VAPIGEN_VAPIS) $(VAPIGEN_VAPIS:.vapi=.deps)
+
+CLEANFILES += $(vapi_DATA)
+endif
+
 maintainer-clean-local:
 	rm -rf tmp-introspect*
